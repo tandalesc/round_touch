@@ -1,0 +1,9 @@
+#ifndef _CONSTANTS_H_
+#define _CONSTANTS_H_
+
+#define SPLASH_SCREEN_JPEG_PATH "/logo_240240.jpg"
+
+#define SCREEN_MAX_WIDTH 240
+#define SCREEN_MAX_HEIGHT 240
+
+#endif // _CONSTANTS_H_
