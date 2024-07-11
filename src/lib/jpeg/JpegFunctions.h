@@ -10,8 +10,8 @@
 #include <JPEGDEC.h>
 
 #include "src/config/Constants.h"
-#include "src/jpeg/JpegIO.h"
-#include "src/jpeg/JpegRender.h"
+#include "src/lib/jpeg/JpegIO.h"
+#include "src/lib/jpeg/JpegRender.h"
 
 static JPEGDEC _jpeg;
 
