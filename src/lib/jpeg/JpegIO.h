@@ -9,11 +9,7 @@ static File _f;
 
 static void *jpegOpenFile(const char *szFilename, int32_t *pFileSize) {
   SDCard &sdcard = SDCard::getInstance();
-#if defined(ESP32)
-  _f = SD.open(szFilename, "r");
-#else
-  _f = SD.open(szFilename, FILE_READ);
-#endif
+  _f = sdcard.open_r(szFilename);
   *pFileSize = _f.size();
   return &_f;
 }
