@@ -8,6 +8,7 @@ Application app(&device);
 void setup(void) {
   Serial.begin(115200);
   device.init();
+  app.init();
 }
 
 void loop() {

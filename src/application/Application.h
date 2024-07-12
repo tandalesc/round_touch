@@ -9,14 +9,17 @@ class Application {
 private:
   Device *_device;
   Workflow _workflow;
+  void process();
 
 public:
-  Application(Device *device);
+  Application(Device *device) : _device(device) {};
+  void init();
   void loop();
-  void ready();
 
   Device *device();
   Workflow &workflow();
 };
+
+typedef void (*RenderFunction)(Application *);
 
 #endif // _APPLICATION_H_
