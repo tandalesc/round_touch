@@ -5,26 +5,22 @@ Device *Application::device() { return this->_device; }
 Workflow &Application::workflow() { return this->_workflow; }
 
 void Application::init() {
-  this->workflow().start();
+  this->workflow().navigate(READY);
   Serial.println("Initialized Application.");
 }
 
-void Application::loop() {
-  this->process();
-}
+void Application::loop() { this->process(); }
 
 void Application::process() {
   Workflow &workflow = this->workflow();
-  // run state logic without rendering
-  processState(this, workflow.getState());
+  bool render = false;
   if (workflow.hasChanges()) {
-    Serial.println("Something changed, re-rendering.");
     workflow.applyChanges();
-    // render the output this time
-    // TODO - only run processState once per loop
-    RenderFunction renderView = processState(this, workflow.getState());
+    render = true;
+  }
+  RenderFunction renderView = processState(this, workflow.getState());
+  if (render) {
+    Serial.println("Something changed, re-rendering.");
     renderView(this);
-    // wait
-    delay(500);
   }
 }

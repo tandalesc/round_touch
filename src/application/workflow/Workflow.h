@@ -8,6 +8,9 @@ private:
   State state = NOT_STARTED;
   State prevState = NOT_STARTED;
   bool changed = false;
+  // prevent making multiple conflicting navigate calls
+  unsigned long pauseTimer = 0;
+  void pauseNavigation();
 
 public:
   State getState();
