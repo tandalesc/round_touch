@@ -1,10 +1,5 @@
 #include "src/application/Application.h"
 
-void NotStartedState(Application *app) {
-  Serial.println("Device not started.");
-  delay(10000);
-}
-
 void ErrorState(Application *app) {
   Device *device = app->device();
   TouchScreen &touch = device->touchscreen();
@@ -137,7 +132,8 @@ void DetailsState(Application *app) {
 void renderApplication(Application *app) {
   State state = app->workflow().getState();
   if (state == NOT_STARTED) {
-    NotStartedState(app);
+    Serial.println("Device not started.");
+    delay(10000);
   } else if (state == ERROR) {
     ErrorState(app);
   } else if (state == READY) {
