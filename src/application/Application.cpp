@@ -1,19 +1,26 @@
 #include "src/application/Application.h"
 #include "src/application/workflow/WorkflowStates.h"
 
-Application::Application(Device *device) { this->_device = device; }
-
 Device *Application::device() { return this->_device; }
 Workflow &Application::workflow() { return this->_workflow; }
 
-void Application::render() {
-  renderWorkflowState(this);
-  delay(500);
+void Application::init() {
+  this->workflow().navigate(READY);
+  Serial.println("Initialized Application.");
 }
 
-void Application::ready() {
-  auto gfx = this->device()->display().gfx;
-  gfx->fillScreen(BLACK);
-  this->device()->showMessage("DETAILS");
-  this->workflow().navigate(READY);
+void Application::loop() { this->process(); }
+
+void Application::process() {
+  Workflow &workflow = this->workflow();
+  bool render = false;
+  if (workflow.hasChanges()) {
+    workflow.applyChanges();
+    render = true;
+  }
+  RenderFunction renderView = processState(this, workflow.getState());
+  if (render) {
+    Serial.println("Something changed, re-rendering.");
+    renderView(this);
+  }
 }

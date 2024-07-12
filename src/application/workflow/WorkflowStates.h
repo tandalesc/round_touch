@@ -1,156 +1,141 @@
 #include "src/application/Application.h"
 
-void NotStartedState(Application *app) {
-  Serial.println("Device not started.");
-  delay(10000);
-}
-
-void ErrorState(Application *app) {
-  Device *device = app->device();
-  TouchScreen &touch = device->touchscreen();
-  if (touch.available()) {
-    if (touch.gesture() == "SWIPE DOWN") {
-      app->ready();
-    }
+RenderFunction ErrorState(Application *app) {
+  TouchScreen &touch = app->device()->touchscreen();
+  Workflow &workflow = app->workflow();
+  if (touch.available() && touch.gesture() == "SWIPE DOWN") {
+    workflow.navigate(READY);
   }
+  return [](Application *app) -> void {
+    auto gfx = app->device()->display().gfx;
+    gfx->fillScreen(BLACK);
+    app->device()->showMessage("Error!");
+  };
 }
 
 // READY INFO1 INFO2 INFO3
 // ECOMODE
 
-void EcoModeState(Application *app) {
-  Device *device = app->device();
-  TouchScreen &touch = device->touchscreen();
-  if (touch.available() && touch.gesture() == "SWIPE UP") {
-    app->ready();
+RenderFunction EcoModeState(Application *app) {
+  TouchScreen &touch = app->device()->touchscreen();
+  Workflow &workflow = app->workflow();
+  if (touch.available() && touch.gesture() == "SWIPE DOWN") {
+    workflow.navigate(READY);
   }
+  return [](Application *app) -> void {
+    auto gfx = app->device()->display().gfx;
+    gfx->fillScreen(GREEN);
+    app->device()->showMessage("ECO Mode");
+  };
 }
 
-void ReadyState(Application *app) {
-  Device *device = app->device();
-  TouchScreen &touch = device->touchscreen();
+RenderFunction ReadyState(Application *app) {
+  TouchScreen &touch = app->device()->touchscreen();
   Workflow &workflow = app->workflow();
-  auto gfx = device->display().gfx;
   if (touch.available()) {
     if (touch.gesture() == "SINGLE CLICK") {
       workflow.navigate(DETAILS);
-      gfx->fillScreen(BLACK);
-      device->showMessage("2002 MAZDA MIATA NB");
-    }
-
-    if (touch.gesture() == "SWIPE DOWN") {
+    } else if (touch.gesture() == "SWIPE UP") {
       workflow.navigate(ECOMODE);
-      gfx->fillScreen(GREEN);
-      device->showMessage("ECO MODE");
-    }
-
-    if (touch.gesture() == "SWIPE LEFT") {
+    } else if (touch.gesture() == "SWIPE LEFT") {
       workflow.navigate(INFO1);
-      gfx->fillScreen(BLACK);
-      device->showMessage("GAUGES");
     }
   }
+  return [](Application *app) -> void {
+    auto gfx = app->device()->display().gfx;
+    gfx->fillScreen(BLACK);
+    app->device()->showMessage("Details");
+  };
 }
 
-void Info1State(Application *app) {
-  Device *device = app->device();
-  TouchScreen &touch = device->touchscreen();
+RenderFunction Info1State(Application *app) {
+  TouchScreen &touch = app->device()->touchscreen();
   Workflow &workflow = app->workflow();
-  auto gfx = device->display().gfx;
   if (touch.available()) {
-    if (touch.gesture() == "SWIPE DOWN") {
+    if (touch.gesture() == "SWIPE UP") {
       workflow.navigate(ECOMODE);
-      gfx->fillScreen(BLACK);
-      device->showMessage("ECO MODE");
-    }
-
-    if (touch.gesture() == "SWIPE LEFT") {
+    } else if (touch.gesture() == "SWIPE LEFT") {
       workflow.navigate(INFO2);
-      gfx->fillScreen(BLACK);
-      device->showMessage("TUNING");
-    }
-
-    if (touch.gesture() == "SWIPE RIGHT") {
-      app->ready();
+    } else if (touch.gesture() == "SWIPE RIGHT") {
+      workflow.navigate(READY);
     }
   }
+  return [](Application *app) -> void {
+    auto gfx = app->device()->display().gfx;
+    gfx->fillScreen(BLACK);
+    app->device()->showMessage("Gauges");
+  };
 }
 
-void Info2State(Application *app) {
-  Device *device = app->device();
-  TouchScreen &touch = device->touchscreen();
+RenderFunction Info2State(Application *app) {
+  TouchScreen &touch = app->device()->touchscreen();
   Workflow &workflow = app->workflow();
-  auto gfx = device->display().gfx;
   if (touch.available()) {
-    if (touch.gesture() == "SWIPE DOWN") {
+    if (touch.gesture() == "SWIPE UP") {
       workflow.navigate(ECOMODE);
-      gfx->fillScreen(BLACK);
-      device->showMessage("ECO MODE");
-    }
-
-    if (touch.gesture() == "SWIPE LEFT") {
+    } else if (touch.gesture() == "SWIPE LEFT") {
       workflow.navigate(INFO3);
-      gfx->fillScreen(BLACK);
-      device->showMessage("STATISTICS");
-    }
-
-    if (touch.gesture() == "SWIPE RIGHT") {
+    } else if (touch.gesture() == "SWIPE RIGHT") {
       workflow.navigate(INFO1);
-      gfx->fillScreen(BLACK);
-      device->showMessage("GAUGES");
     }
   }
+  return [](Application *app) -> void {
+    auto gfx = app->device()->display().gfx;
+    gfx->fillScreen(BLACK);
+    app->device()->showMessage("Tuning");
+  };
 }
 
-void Info3State(Application *app) {
-  Device *device = app->device();
-  TouchScreen &touch = device->touchscreen();
+RenderFunction Info3State(Application *app) {
+  TouchScreen &touch = app->device()->touchscreen();
   Workflow &workflow = app->workflow();
-  auto gfx = device->display().gfx;
   if (touch.available()) {
-    if (touch.gesture() == "SWIPE DOWN") {
+    if (touch.gesture() == "SWIPE UP") {
       workflow.navigate(ECOMODE);
-      gfx->fillScreen(BLACK);
-      device->showMessage("ECO MODE");
-    }
-
-    if (touch.gesture() == "SWIPE RIGHT") {
+    } else if (touch.gesture() == "SWIPE RIGHT") {
       workflow.navigate(INFO2);
-      gfx->fillScreen(BLACK);
-      device->showMessage("TUNING");
     }
   }
+  return [](Application *app) -> void {
+    auto gfx = app->device()->display().gfx;
+    gfx->fillScreen(BLACK);
+    app->device()->showMessage("Settings");
+  };
 }
 
-void DetailsState(Application *app) {
-  Device *device = app->device();
-  TouchScreen &touch = device->touchscreen();
+RenderFunction DetailsState(Application *app) {
+  TouchScreen &touch = app->device()->touchscreen();
   Workflow &workflow = app->workflow();
-  auto gfx = device->display().gfx;
-  if (touch.available()) {
-    if (touch.gesture() == "SWIPE DOWN") {
-      app->ready();
-    }
+  if (touch.available() && touch.gesture() == "SWIPE DOWN") {
+    workflow.navigate(READY);
   }
+  return [](Application *app) -> void {
+    auto gfx = app->device()->display().gfx;
+    gfx->fillScreen(BLACK);
+    app->device()->showMessage("2002 Mazda Miata NB");
+  };
 }
 
-void renderWorkflowState(Application *app) {
-  State state = app->workflow().getState();
+RenderFunction SkipRender = [](Application *app) -> void {};
+
+RenderFunction processState(Application *app, State state) {
   if (state == NOT_STARTED) {
-    NotStartedState(app);
+    Serial.println("Device not started.");
+    delay(10000);
+    return SkipRender;
   } else if (state == ERROR) {
-    ErrorState(app);
+    return ErrorState(app);
   } else if (state == READY) {
-    ReadyState(app);
+    return ReadyState(app);
   } else if (state == ECOMODE) {
-    EcoModeState(app);
+    return EcoModeState(app);
   } else if (state == INFO1) {
-    Info1State(app);
+    return Info1State(app);
   } else if (state == INFO2) {
-    Info2State(app);
+    return Info2State(app);
   } else if (state == INFO3) {
-    Info3State(app);
+    return Info3State(app);
   } else if (state == DETAILS) {
-    DetailsState(app);
+    return DetailsState(app);
   }
 }
