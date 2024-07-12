@@ -134,7 +134,7 @@ void DetailsState(Application *app) {
   }
 }
 
-void renderWorkflowState(Application *app) {
+void renderApplication(Application *app) {
   State state = app->workflow().getState();
   if (state == NOT_STARTED) {
     NotStartedState(app);

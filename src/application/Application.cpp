@@ -6,8 +6,8 @@ Application::Application(Device *device) { this->_device = device; }
 Device *Application::device() { return this->_device; }
 Workflow &Application::workflow() { return this->_workflow; }
 
-void Application::render() {
-  renderWorkflowState(this);
+void Application::loop() {
+  renderApplication(this);
   delay(500);
 }
 

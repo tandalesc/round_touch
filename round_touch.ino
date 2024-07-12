@@ -1,5 +1,6 @@
-#include "src/application/Application.h"
 #include "src/device/Device.h"
+
+#include "src/application/Application.h"
 
 Device device;
 Application app(&device);
@@ -11,5 +12,5 @@ void setup(void) {
 
 void loop() {
   // TODO render metrics
-  app.render();
+  app.loop();
 }

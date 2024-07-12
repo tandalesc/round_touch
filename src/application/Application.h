@@ -12,7 +12,7 @@ private:
 
 public:
   Application(Device *device);
-  void render();
+  void loop();
   void ready();
 
   Device *device();
