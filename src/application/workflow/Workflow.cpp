@@ -25,7 +25,7 @@ void Workflow::navigate(State newState) {
 
 void Workflow::pauseNavigation() {
   // prevent navigation from firing repeatedly
-  this->pauseTimer = millis() + 500;
+  this->pauseTimer = millis() + 100;
 }
 
 bool Workflow::hasChanges() { return this->changed; }
