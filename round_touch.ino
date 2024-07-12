@@ -23,7 +23,10 @@ void loop() {
     Info2State();
   } else if (state == INFO3) {
     Info3State();
+  } else if (state == DETAILS) {
+    DetailsState();
   }
+
   delay(500);
 }
 
@@ -57,9 +60,15 @@ void ReadyState() {
   Workflow &workflow = device.workflow();
   auto gfx = device.display().gfx;
   if (touch.available()) {
+    if (touch.gesture() == "SINGLE CLICK") {
+      workflow.navigate(DETAILS);
+      gfx->fillScreen(BLACK);
+      device.showMessage("2002 MAZDA MIATA NB");
+    }
+    
     if (touch.gesture() == "SWIPE DOWN") {
       workflow.navigate(ECOMODE);
-      gfx->fillScreen(BLACK);
+      gfx->fillScreen(GREEN);
       device.showMessage("ECO MODE");
     }
 
@@ -134,6 +143,17 @@ void Info3State() {
       workflow.navigate(INFO2);
       gfx->fillScreen(BLACK);
       device.showMessage("TUNING");
+    }
+  }
+}
+
+void DetailsState() {
+  TouchScreen &touch = device.touchscreen();
+  Workflow &workflow = device.workflow();
+  auto gfx = device.display().gfx;
+  if (touch.available()) {
+    if (touch.gesture() == "SWIPE DOWN") {
+      device.ready();
     }
   }
 }

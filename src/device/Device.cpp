@@ -28,7 +28,7 @@ void Device::showSplashScreen() {
 void Device::ready() {
   auto gfx = this->display().gfx;
   gfx->fillScreen(BLACK);
-  this->showMessage("MIATA NB");
+  this->showMessage("DETAILS");
   this->workflow().navigate(READY);
 }
 
