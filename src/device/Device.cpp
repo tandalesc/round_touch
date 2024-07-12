@@ -10,7 +10,6 @@ void Device::init() {
     return;
   }
   this->showSplashScreen();
-  this->ready();
 }
 
 void Device::showMessage(const char *msg) {
@@ -25,17 +24,7 @@ void Device::showSplashScreen() {
   delay(2000);
 }
 
-void Device::ready() {
-  auto gfx = this->display().gfx;
-  gfx->fillScreen(BLACK);
-  this->showMessage("DETAILS");
-  this->workflow().navigate(READY);
-}
-
 // Hardware
 Display &Device::display() { return Display::getInstance(); }
 TouchScreen &Device::touchscreen() { return TouchScreen::getInstance(); }
 SDCard &Device::sdcard() { return SDCard::getInstance(); }
-
-// System State
-Workflow &Device::workflow() { return this->_workflow; }
