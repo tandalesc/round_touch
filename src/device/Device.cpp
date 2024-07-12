@@ -13,10 +13,10 @@ void Device::init() {
   this->ready();
 }
 
-void Device::showErrorMessage(const char *msg) {
+void Device::showMessage(const char *msg) {
   auto gfx = this->display().gfx;
   gfx->setTextSize(4);
-  gfx->setCursor(10, 120);
+  gfx->setCursor(10, 80);
   gfx->println(F(msg));
 }
 
@@ -27,19 +27,15 @@ void Device::showSplashScreen() {
 
 void Device::ready() {
   auto gfx = this->display().gfx;
-  gfx->fillScreen(WHITE);
-  this->workflow.navigate(READY);
-}
-
-void Device::error(const char *msg) {
-  auto gfx = this->display().gfx;
   gfx->fillScreen(BLACK);
-  this->showErrorMessage(msg);
-  this->workflow.navigate(ERROR);
+  this->showMessage("MIATA NB");
+  this->workflow().navigate(READY);
 }
 
+// Hardware
 Display &Device::display() { return Display::getInstance(); }
-
 TouchScreen &Device::touchscreen() { return TouchScreen::getInstance(); }
-
 SDCard &Device::sdcard() { return SDCard::getInstance(); }
+
+// System State
+Workflow &Device::workflow() { return this->_workflow; }

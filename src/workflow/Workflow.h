@@ -1,7 +1,7 @@
 #ifndef _WORKFLOW_H_
 #define _WORKFLOW_H_
 
-enum State { NOT_STARTED, READY, ERROR };
+enum State { NOT_STARTED, ERROR, READY, INFO1, INFO2, INFO3, ECOMODE };
 
 class Workflow {
 private:
