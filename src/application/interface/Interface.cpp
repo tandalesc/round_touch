@@ -1,5 +1,6 @@
-#include "src/application/interface/Interface.h"
 #include "src/application/Application.h"
+
+#include "src/application/interface/Interface.h"
 #include "src/application/interface/components/Components.h"
 
 RenderableComponent createComponent(Application *app, State state) {
@@ -34,6 +35,9 @@ void Interface::process(Application *app) {
   // renderable component must always be deleted after using
   RenderableComponent component = createComponent(app, workflow.getState());
   if (render) {
+    LayoutContext rootLayout = {.position = {.t = 80, .l = 10}};
+    component->calculateSize();
+    component->updateLayout(rootLayout);
     component->render(app);
   }
   delete component;

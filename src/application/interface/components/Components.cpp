@@ -40,7 +40,8 @@ RenderableComponent ReadyState(Application *app) {
       workflow.navigate(INFO1);
     }
   }
-  return E(FillScreen, {BLACK}, E(Text, {"Details"}));
+  return E(FillScreen, {BLACK},
+           E(FlexLayout, {padding : {t : 20, l : 20}}, {E(Text, {"Details"})}));
 }
 
 RenderableComponent Info1State(Application *app) {
@@ -92,6 +93,23 @@ RenderableComponent DetailsState(Application *app) {
   if (touch.available() && touch.gesture() == "SWIPE DOWN") {
     workflow.navigate(READY);
   }
-  return E(FillScreen, {.color = BLACK},
-           E(Text, {.text = "2002 Mazda Miata NB", .size = 2}));
+  return (
+    E(FillScreen, {.color = BLACK},
+      E(FlexLayout, {.list = {.type = COLUMN}}, {
+        E(FlexLayout, {.list = {.type = ROW}, .padding = {.l = 5}}, {
+          E(FlexLayout, {.list = {.type = COLUMN}, .padding = {.t = 5}}, {
+            E(Text, {.text = "2002", .size = 3}),
+          }),
+          E(FlexLayout, {.list = {.type = COLUMN}, .padding = {.l = 5}}, {
+            E(Text, {.text = "Mazda Miata", .size = 2}),
+            E(Text, {.text = "1.8L Stock", .size = 2})
+          })
+        }),
+        E(FlexLayout, {.list = {.type = COLUMN}, .padding = {.t = 5, .l = 12}}, {
+          E(Text, {.text = "Special Edition", .size = 2}),
+          E(Text, {.text = "6 Speed", .size = 2})
+        })
+      })
+    )
+  );
 }
