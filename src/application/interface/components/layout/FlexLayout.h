@@ -20,6 +20,12 @@ public:
     this->layout = layout;
   };
 
+  template <typename... T>
+  FlexLayout(LayoutContext layout, T*... children)
+      : initial(layout), children{children...} {
+    this->layout = layout;
+  };
+
   ~FlexLayout() {
     for (auto *child : this->children) {
       delete child;

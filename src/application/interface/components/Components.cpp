@@ -12,7 +12,13 @@ RenderableComponent ErrorState(Application *app) {
   if (touch.available() && touch.gesture() == "SWIPE DOWN") {
     workflow.navigate(READY);
   }
-  return E(FillScreen, {BLACK}, E(Text, {"Error!"}));
+  return (
+    E(FillScreen, {BLACK},
+      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+        E(Text, {"Error!"})
+      )
+    )
+  );
 }
 
 // READY INFO1 INFO2 INFO3
@@ -24,8 +30,13 @@ RenderableComponent EcoModeState(Application *app) {
   if (touch.available() && touch.gesture() == "SWIPE DOWN") {
     workflow.navigate(READY);
   }
-  return E(FillScreen, {.color = GREEN},
-           E(Text, {.text = "ECO Mode", .color = BLACK, .size = 4}));
+  return (
+    E(FillScreen, {.color = GREEN},
+      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+        E(Text, {.text = "ECO Mode", .color = BLACK})
+      )
+    )
+  );
 }
 
 RenderableComponent ReadyState(Application *app) {
@@ -40,8 +51,13 @@ RenderableComponent ReadyState(Application *app) {
       workflow.navigate(INFO1);
     }
   }
-  return E(FillScreen, {BLACK},
-           E(FlexLayout, {padding : {t : 20, l : 20}}, {E(Text, {"Details"})}));
+  return (
+    E(FillScreen, {BLACK},
+      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+        E(Text, {"Details"})
+      )
+    )
+  );
 }
 
 RenderableComponent Info1State(Application *app) {
@@ -56,7 +72,13 @@ RenderableComponent Info1State(Application *app) {
       workflow.navigate(READY);
     }
   }
-  return E(FillScreen, {BLACK}, E(Text, {"Gauges"}));
+  return (
+    E(FillScreen, {BLACK},
+      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+        E(Text, {"Gauges"})
+      )
+    )
+  );
 }
 
 RenderableComponent Info2State(Application *app) {
@@ -71,7 +93,13 @@ RenderableComponent Info2State(Application *app) {
       workflow.navigate(INFO1);
     }
   }
-  return E(FillScreen, {BLACK}, E(Text, {"Tuning"}));
+  return (
+    E(FillScreen, {BLACK},
+      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+        E(Text, {"Tuning"})
+      )
+    )
+  );
 }
 
 RenderableComponent Info3State(Application *app) {
@@ -84,7 +112,13 @@ RenderableComponent Info3State(Application *app) {
       workflow.navigate(INFO2);
     }
   }
-  return new FillScreen({BLACK}, new Text({"Settings"}));
+  return (
+    E(FillScreen, {BLACK},
+      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+        E(Text, {"Settings"})
+      )
+    )
+  );
 }
 
 RenderableComponent DetailsState(Application *app) {
@@ -95,21 +129,21 @@ RenderableComponent DetailsState(Application *app) {
   }
   return (
     E(FillScreen, {.color = BLACK},
-      E(FlexLayout, {.list = {.type = COLUMN}}, {
-        E(FlexLayout, {.list = {.type = ROW}, .padding = {.l = 5}}, {
-          E(FlexLayout, {.list = {.type = COLUMN}, .padding = {.t = 5}}, {
-            E(Text, {.text = "2002", .size = 3}),
-          }),
-          E(FlexLayout, {.list = {.type = COLUMN}, .padding = {.l = 5}}, {
+      E(FlexLayout, {.list = {.type = COLUMN}},
+        E(FlexLayout, {.list = {.type = ROW}, .padding = {.l = 5}},
+          E(FlexLayout, {.list = {.type = COLUMN}, .padding = {.t = 5}},
+            E(Text, {.text = "2002", .size = 3})
+          ),
+          E(FlexLayout, {.list = {.type = COLUMN}, .padding = {.l = 5}},
             E(Text, {.text = "Mazda Miata", .size = 2}),
             E(Text, {.text = "1.8L Stock", .size = 2})
-          })
-        }),
-        E(FlexLayout, {.list = {.type = COLUMN}, .padding = {.t = 5, .l = 12}}, {
+          )
+        ),
+        E(FlexLayout, {.list = {.type = COLUMN}, .padding = {.t = 5, .l = 12}},
           E(Text, {.text = "Special Edition", .size = 2}),
           E(Text, {.text = "6 Speed", .size = 2})
-        })
-      })
+        )
+      )
     )
   );
 }
