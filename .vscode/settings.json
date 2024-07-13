@@ -12,6 +12,7 @@
         "ios": "cpp",
         "locale": "cpp",
         "limits": "cpp",
-        "tuple": "cpp"
+        "tuple": "cpp",
+        "bitset": "cpp"
     }
 }

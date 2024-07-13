@@ -4,12 +4,13 @@
 #include "src/device/Device.h"
 
 #include "src/application/workflow/Workflow.h"
+#include "src/application/interface/Interface.h"
 
 class Application {
 private:
   Device *_device;
   Workflow _workflow;
-  void process();
+  Interface _interface;
 
 public:
   Application(Device *device) : _device(device) {};
@@ -18,8 +19,7 @@ public:
 
   Device *device();
   Workflow &workflow();
+  Interface &interface();
 };
-
-typedef void (*RenderFunction)(Application *);
 
 #endif // _APPLICATION_H_
