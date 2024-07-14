@@ -3,15 +3,12 @@
 
 #include <CST816S.h>
 
+#include "src/device/types/TouchLocation.h"
+
 #define TOUCH_SDA 38
 #define TOUCH_SCL 39
 #define TOUCH_RST 16
 #define TOUCH_INT 40
-
-struct TouchLocation {
-  int x;
-  int y;
-};
 
 class TouchScreen {
 private:

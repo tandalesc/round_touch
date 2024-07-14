@@ -110,8 +110,11 @@ RenderableComponent Info3State(Application *app) {
       workflow.navigate(ECOMODE);
     } else if (touch.gesture() == "SWIPE RIGHT") {
       workflow.navigate(INFO2);
-    } else if (touch.gesture() == "SINGLE CLICK") {
-      app->events().addEvent({EventType::TouchEvent});
+    } else if (touch.gesture() == "SINGLE CLICK") { 
+      app->touchEvents().post({
+        .type = TouchEvent::Tap,
+        .location = touch.location()
+      });
     }
   }
   return (
