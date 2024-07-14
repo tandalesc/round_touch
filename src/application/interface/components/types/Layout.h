@@ -4,7 +4,7 @@
 struct Position {
   int t = 0, b = 0, l = 0, r = 0;
 
-  Position operator+(const Position& a) {
+  Position operator+(const Position &a) {
     return {a.t + t, a.b + b, a.l + l, a.r + r};
   }
 };
@@ -13,15 +13,15 @@ struct Size {
   int width = 0, height = 0;
 };
 
-enum ListType { ROW, COLUMN };
+enum class LayoutType { Row, Column, None };
 
-struct ListProps {
-  int position = 0;
-  ListType type = COLUMN;
+struct LayoutProps {
+  LayoutType type = LayoutType::None;
+  int index = 0;
 };
 
 struct LayoutContext {
-  ListProps list = {};
+  LayoutProps props = {};
   Position padding = {};
   Position position = {};
   Size size = {};
