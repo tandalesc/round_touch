@@ -4,28 +4,31 @@
 #include "src/application/interface/components/types/Component.h"
 
 struct TextProps {
-  const char *text = "";
-  uint16_t color = WHITE;
   uint8_t size = 4;
+  uint16_t color = WHITE;
 };
 
 class Text : public Component {
   TextProps props;
+  const char *text = "";
 
 public:
-  Text(TextProps props) : props(props) { this->calculateSize(); };
+  Text(TextProps props, const char *text) : props(props), text(text) {
+    this->calculateSize();
+  };
+  Text(const char *text) : Text({}, text) {};
 
   void calculateSize() override {
-    this->layout.size.width = strlen(props.text) * 6 * props.size;
-    this->layout.size.height = 12 * props.size;
+    layout.size.width = strlen(text) * 6 * props.size;
+    layout.size.height = 12 * props.size;
   }
 
   void render(Application *app) override {
     auto gfx = app->device()->display().gfx;
-    gfx->setCursor(this->layout.position.l, this->layout.position.t);
-    gfx->setTextSize(this->props.size);
-    gfx->setTextColor(this->props.color);
-    gfx->print(this->props.text);
+    gfx->setCursor(layout.position.l, layout.position.t);
+    gfx->setTextSize(props.size);
+    gfx->setTextColor(props.color);
+    gfx->print(text);
   }
 };
 

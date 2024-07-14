@@ -15,7 +15,7 @@ RenderableComponent ErrorState(Application *app) {
   return (
     E(FillScreen, {BLACK},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, {"Error!"})
+        E(Text, "Error!")
       )
     )
   );
@@ -33,7 +33,7 @@ RenderableComponent EcoModeState(Application *app) {
   return (
     E(FillScreen, {.color = GREEN},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, {.text = "ECO Mode", .color = BLACK})
+        E(Text, {.color = BLACK}, "ECO Mode")
       )
     )
   );
@@ -54,7 +54,7 @@ RenderableComponent ReadyState(Application *app) {
   return (
     E(FillScreen, {BLACK},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, {"Details"})
+        E(Text, "Details")
       )
     )
   );
@@ -75,7 +75,7 @@ RenderableComponent Info1State(Application *app) {
   return (
     E(FillScreen, {BLACK},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, {"Gauges"})
+        E(Text, "Gauges")
       )
     )
   );
@@ -96,7 +96,7 @@ RenderableComponent Info2State(Application *app) {
   return (
     E(FillScreen, {BLACK},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, {"Tuning"})
+        E(Text, "Tuning")
       )
     )
   );
@@ -115,7 +115,7 @@ RenderableComponent Info3State(Application *app) {
   return (
     E(FillScreen, {BLACK},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, {"Settings"})
+        E(Text, "Settings")
       )
     )
   );
@@ -128,20 +128,20 @@ RenderableComponent DetailsState(Application *app) {
     workflow.navigate(READY);
   }
   return (
-    E(FillScreen, {.color = BLACK},
+    E(FillScreen, {BLACK},
       E(FlexLayout, {.type = LayoutType::Column},
         E(FlexLayout, {.type = LayoutType::Row, .padding = {.l = 5}},
           E(FlexLayout, {.type = LayoutType::Column, .padding = {.t = 5}},
-            E(Text, {.text = "2002", .size = 3})
+            E(Text, {.size = 3}, "2002")
           ),
           E(FlexLayout, {.type = LayoutType::Column, .padding = {.l = 5}},
-            E(Text, {.text = "Mazda Miata", .size = 2}),
-            E(Text, {.text = "1.8L Stock", .size = 2})
+            E(Text, {.size = 2}, "Mazda Miata"),
+            E(Text, {.size = 2}, "1.8L Stock")
           )
         ),
         E(FlexLayout, {.type = LayoutType::Column, .padding = {.t = 5, .l = 12}},
-          E(Text, {.text = "Special Edition", .size = 2}),
-          E(Text, {.text = "6 Speed", .size = 2})
+          E(Text, {.size = 2}, "Special Edition"),
+          E(Text, {.size = 2}, "6 Speed")
         )
       )
     )
