@@ -1,20 +1,18 @@
-#ifndef _FILL_SCREEN_COMPONENT_H_
-#define _FILL_SCREEN_COMPONENT_H_
+#ifndef _SWIPE_INPUT_COMPONENT_H_
+#define _SWIPE_INPUT_COMPONENT_H_
 
 #include "src/application/interface/components/types/Component.h"
 
-struct SwipeInputProps {};
+static void handleEvent(Event &event) {
+  // todo, other stuff
+  Serial.println("That worked somehow");
+}
 
 class SwipeInput : public Component {
-private:
-  SwipeInputProps props;
-
 public:
-  SwipeInput(SwipeInputProps props) : props(props) {};
-
   void setupEventListeners(Application *app) override {
-
+    app->events().subscribe(EventType::TouchEvent, *handleEvent);
   }
 };
 
-#endif // _FILL_SCREEN_COMPONENT_H_
+#endif // _SWIPE_INPUT_COMPONENT_H_

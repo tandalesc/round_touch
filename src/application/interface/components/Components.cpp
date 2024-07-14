@@ -110,12 +110,15 @@ RenderableComponent Info3State(Application *app) {
       workflow.navigate(ECOMODE);
     } else if (touch.gesture() == "SWIPE RIGHT") {
       workflow.navigate(INFO2);
+    } else if (touch.gesture() == "SINGLE CLICK") {
+      app->events().addEvent({EventType::TouchEvent});
     }
   }
   return (
     E(FillScreen, {BLACK},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, "Settings")
+        E(Text, "Settings"),
+        E(SwipeInput)
       )
     )
   );

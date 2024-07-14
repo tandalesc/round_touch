@@ -1,8 +1,8 @@
 #ifndef _EVENTBUS_EVENT_T_
 #define _EVENTBUS_EVENT_T_
 
-enum EventType {
-  NoEvent,
+enum class EventType {
+  None,
   TouchEvent,
   WorkflowEvent,
   NetworkEvent,
@@ -10,7 +10,7 @@ enum EventType {
 };
 
 struct EventFormat {
-  EventType type;
+  EventType type = EventType::None;
 };
 
 struct Event {

@@ -38,6 +38,7 @@ void Interface::process(Application *app) {
     LayoutContext rootLayout = {.position = {.t = 80, .l = 10}};
     component->calculateSize();
     component->updateLayout(rootLayout);
+    component->setupEventListeners(app);
     component->render(app);
   }
   delete component;
