@@ -1,12 +1,12 @@
 #ifndef _LAYOUT_TYPES_H_
 #define _LAYOUT_TYPES_H_
 
-struct Padding {
-  int t = 0, b = 0, l = 0, r = 0;
-};
-
 struct Position {
   int t = 0, b = 0, l = 0, r = 0;
+
+  Position operator+(const Position& a) {
+    return {a.t + t, a.b + b, a.l + l, a.r + r};
+  }
 };
 
 struct Size {
@@ -22,7 +22,7 @@ struct ListProps {
 
 struct LayoutContext {
   ListProps list = {};
-  Padding padding = {};
+  Position padding = {};
   Position position = {};
   Size size = {};
 };
