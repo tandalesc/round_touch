@@ -16,11 +16,11 @@ struct Size {
 enum class LayoutType { Row, Column, None };
 
 struct LayoutProps {
-  LayoutType type = LayoutType::None;
   int index = 0;
 };
 
 struct LayoutContext {
+  LayoutType type = LayoutType::None;
   LayoutProps props = {};
   Position padding = {};
   Position position = {};

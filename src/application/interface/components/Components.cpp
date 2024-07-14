@@ -129,17 +129,17 @@ RenderableComponent DetailsState(Application *app) {
   }
   return (
     E(FillScreen, {.color = BLACK},
-      E(FlexLayout, {.props = {.type = LayoutType::Column}},
-        E(FlexLayout, {.props = {.type = LayoutType::Row}, .padding = {.l = 5}},
-          E(FlexLayout, {.props = {.type = LayoutType::Column}, .padding = {.t = 5}},
+      E(FlexLayout, {.type = LayoutType::Column},
+        E(FlexLayout, {.type = LayoutType::Row, .padding = {.l = 5}},
+          E(FlexLayout, {.type = LayoutType::Column, .padding = {.t = 5}},
             E(Text, {.text = "2002", .size = 3})
           ),
-          E(FlexLayout, {.props = {.type = LayoutType::Column}, .padding = {.l = 5}},
+          E(FlexLayout, {.type = LayoutType::Column, .padding = {.l = 5}},
             E(Text, {.text = "Mazda Miata", .size = 2}),
             E(Text, {.text = "1.8L Stock", .size = 2})
           )
         ),
-        E(FlexLayout, {.props = {.type = LayoutType::Column}, .padding = {.t = 5, .l = 12}},
+        E(FlexLayout, {.type = LayoutType::Column, .padding = {.t = 5, .l = 12}},
           E(Text, {.text = "Special Edition", .size = 2}),
           E(Text, {.text = "6 Speed", .size = 2})
         )
