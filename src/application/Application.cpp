@@ -3,6 +3,7 @@
 Device *Application::device() { return this->_device; }
 Workflow &Application::workflow() { return this->_workflow; }
 Interface &Application::interface() { return this->_interface; }
+EventBus &Application::events() { return this->_eventbus; }
 
 void Application::init() {
   this->workflow().navigate(READY);
