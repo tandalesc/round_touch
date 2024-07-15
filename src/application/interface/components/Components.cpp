@@ -54,7 +54,8 @@ RenderableComponent ReadyState(Application *app) {
   return (
     E(FillScreen, {BLACK},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, "Details")
+        E(Text, "Details"),
+        E(SwipeInput)
       )
     )
   );
@@ -110,18 +111,12 @@ RenderableComponent Info3State(Application *app) {
       workflow.navigate(ECOMODE);
     } else if (touch.gesture() == "SWIPE RIGHT") {
       workflow.navigate(INFO2);
-    } else if (touch.gesture() == "SINGLE CLICK") { 
-      app->touchEvents().post({
-        .type = TouchEvent::Tap,
-        .location = touch.location()
-      });
     }
   }
   return (
     E(FillScreen, {BLACK},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, "Settings"),
-        E(SwipeInput)
+        E(Text, "Settings")
       )
     )
   );

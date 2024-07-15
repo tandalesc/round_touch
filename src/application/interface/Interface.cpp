@@ -1,29 +1,14 @@
 #include "src/application/Application.h"
 
 #include "src/application/interface/Interface.h"
-#include "src/application/interface/components/Components.h"
+#include "src/application/interface/components/ComponentManager.h"
+#include "src/application/interface/components/types/Component.h"
 
-RenderableComponent createComponent(Application *app, State state) {
-  if (state == NOT_STARTED) {
-    return DeviceNotStarted();
-  } else if (state == ERROR) {
-    return ErrorState(app);
-  } else if (state == READY) {
-    return ReadyState(app);
-  } else if (state == ECOMODE) {
-    return EcoModeState(app);
-  } else if (state == INFO1) {
-    return Info1State(app);
-  } else if (state == INFO2) {
-    return Info2State(app);
-  } else if (state == INFO3) {
-    return Info3State(app);
-  } else if (state == DETAILS) {
-    return DetailsState(app);
-  }
-}
-
-void Interface::process(Application *app) {
+// creates components every frame, but updates content of the screen
+// only when a workflow change occurs. this allows for immediate
+// processing of any commands while creating the component. still
+// offers a decent amount of performance with deferred rendering.
+void Interface::immediateProcess() {
   bool render = false;
   // if workflow changed, trigger render
   Workflow &workflow = app->workflow();
@@ -33,13 +18,29 @@ void Interface::process(Application *app) {
     render = true;
   }
   // renderable component must always be deleted after using
-  RenderableComponent component = createComponent(app, workflow.getState());
-  if (render) {
-    LayoutContext rootLayout = {.position = {.t = 80, .l = 10}};
-    component->calculateSize();
-    component->updateLayout(rootLayout);
-    component->setupEventListeners(app);
-    component->render(app);
+  manager->createComponent(workflow.getState());
+  if(render) {
+    manager->renderComponent();
   }
-  delete component;
+  manager->deleteComponent();
+}
+
+// creates component and renders only when a workflow change is detected.
+// with this paradigm components live longer, so you must rely on
+// binding input event listeners instead of performing input checks in
+// your component creation code. theoretically more efficient than
+// immediate processing because component code does not need to be run
+// every frame. however, this does complicate setting up event handling
+// code somewhat.
+void Interface::deferredProcess() {
+  Workflow &workflow = app->workflow();
+  // if workflow changed, trigger render
+  if (workflow.hasChanges()) {
+    workflow.applyChanges();
+    Serial.println("Something changed, re-rendering.");
+    // create component and render.
+    // if a component already exists, it will be disposed first
+    manager->createComponent(workflow.getState());
+    manager->renderComponent();
+  }
 }

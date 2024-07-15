@@ -3,8 +3,8 @@
 
 #include "src/device/Device.h"
 
-#include "src/application/workflow/Workflow.h"
 #include "src/application/interface/Interface.h"
+#include "src/application/workflow/Workflow.h"
 
 #include "src/application/eventbus/EventQueue.h"
 #include "src/application/eventbus/types/TouchEvent.h"
@@ -16,8 +16,10 @@ private:
   Interface _interface;
   EventQueue<TouchEvent> _touchEventQueue;
 
+  void processTouchEvents();
+
 public:
-  Application(Device *device) : _device(device) {};
+  Application(Device *device) : _device(device), _interface(this) {};
   void init();
   void loop();
 
