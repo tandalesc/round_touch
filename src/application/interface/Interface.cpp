@@ -12,7 +12,7 @@ Interface::Interface(Application *app) {
 // this automatically deletes the components contained within
 Interface::~Interface() { delete manager; }
 
-void Interface::refreshInterface() {
+void Interface::loop() {
   if (!refresh) {
     return;
   }

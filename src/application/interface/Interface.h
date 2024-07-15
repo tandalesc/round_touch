@@ -20,7 +20,7 @@ public:
   Interface(Application *app);
   ~Interface();
 
-  void refreshInterface();
+  void loop();
   void handleEvent(TouchEvent &event);
   void handleEvent(WorkflowEvent &event);
 };

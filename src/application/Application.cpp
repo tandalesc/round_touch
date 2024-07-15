@@ -25,7 +25,7 @@ void Application::init() {
 
 void Application::loop() {  
   processTouchEvents();
-  interface().refreshInterface();
+  interface().loop();
   // sleep for a bit, we don't need
   // immediate updates
   delay(20);
