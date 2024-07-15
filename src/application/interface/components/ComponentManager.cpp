@@ -29,10 +29,12 @@ void ComponentManager::createComponent(State state) {
 }
 
 void ComponentManager::renderComponent() {
-  active->attachApplication(app);
-  active->calculateSize();
-  active->updateLayout(rootLayout);
-  active->render(app);
+  if (active != nullptr) {
+    active->attachApplication(app);
+    active->calculateSize();
+    active->updateLayout(rootLayout);
+    active->render(app);
+  }
 }
 
 void ComponentManager::deleteComponent() {

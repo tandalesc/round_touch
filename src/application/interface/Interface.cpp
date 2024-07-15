@@ -4,58 +4,30 @@
 #include "src/application/interface/components/ComponentManager.h"
 #include "src/application/interface/components/types/Component.h"
 
-Interface::Interface(Application *app) : app(app) {
+Interface::Interface(Application *app) {
   this->app = app;
   manager = new ComponentManager(app);
 }
 
-Interface::~Interface() {
-  // todo unsubscribe from touch events
-  delete manager;
-}
+// this automatically deletes the components contained within
+Interface::~Interface() { delete manager; }
 
-// creates components every frame, but updates content of the screen
-// only when a workflow change occurs. this allows for immediate
-// processing of any commands while creating the component. still
-// offers a decent amount of performance with deferred rendering.
-// DEPRECATED
-void Interface::immediateProcess() {
-  bool render = false;
-  // if workflow changed, trigger render
-  Workflow &workflow = app->workflow();
-  if (workflow.hasChanges()) {
-    Serial.println("Something changed, re-rendering.");
-    workflow.applyChanges();
-    render = true;
+void Interface::refreshInterface() {
+  if (!refresh) {
+    return;
   }
-  // renderable component must always be deleted after using
-  manager->createComponent(workflow.getState());
-  if (render) {
-    manager->renderComponent();
-  }
-  manager->deleteComponent();
-}
-
-// creates component and renders only when a workflow change is detected.
-// with this paradigm components live longer, so you must rely on
-// binding input event listeners instead of performing input checks in
-// your component creation code. theoretically more efficient than
-// immediate processing because component code does not need to be run
-// every frame. however, this does complicate setting up event handling
-// code somewhat.
-void Interface::deferredProcess() {
-  Workflow &workflow = app->workflow();
-  // if workflow changed, trigger render
-  if (workflow.hasChanges()) {
-    workflow.applyChanges();
-    // Serial.println("Something changed, re-rendering.");
-    // create component and render.
-    // if a component already exists, it will be disposed first
-    manager->createComponent(workflow.getState());
-    manager->renderComponent();
-  }
+  manager->createComponent(app->workflow().getState());
+  manager->renderComponent();
+  refresh = false;
 }
 
 void Interface::handleEvent(TouchEvent &event) {
+  // manager needs to dispatch this event to the active components
   manager->handleEvent(event);
+}
+
+void Interface::handleEvent(WorkflowEvent &event) {
+  // there is only one kind of workflow event right now, so
+  // regardless of what kind it is, trigger a refresh.
+  refresh = true;
 }

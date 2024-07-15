@@ -8,16 +8,24 @@ Interface &Application::interface() { return this->_interface; }
 EventQueue<TouchEvent> &Application::touchEvents() {
   return this->_touchEventQueue;
 }
+EventQueue<WorkflowEvent> &Application::workflowEvents() {
+  return this->_workflowEventQueue;
+}
 
 void Application::init() {
+  // subscribe interface to touch and workflow events
+  // this way the interface will directly receive events
+  // and can handle them directly
   touchEvents().subscribe(&interface());
+  workflowEvents().subscribe(&interface());
+  // kick start application by navigating to first state
   workflow().navigate(READY);
   Serial.println("Initialized Application.");
 }
 
 void Application::loop() {  
   processTouchEvents();
-  interface().deferredProcess();
+  interface().refreshInterface();
 }
 
 // reads all touch events and adds them to the event queue.

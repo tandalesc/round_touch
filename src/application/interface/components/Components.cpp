@@ -103,9 +103,7 @@ RenderableComponent DetailsState() {
       E(TouchNavigation, onSwipeUp(READY)),
       E(FlexLayout, {.type = LayoutType::Column},
         E(FlexLayout, {.type = LayoutType::Row, .padding = {.l = 5}},
-          E(FlexLayout, {.type = LayoutType::Column, .padding = {.t = 5}},
-            E(Text, {.size = 3}, "2002")
-          ),
+          E(Text, {.size = 3}, "2002"),
           E(FlexLayout, {.type = LayoutType::Column, .padding = {.l = 5}},
             E(Text, {.size = 2}, "Mazda Miata"),
             E(Text, {.size = 2}, "1.8L Stock")
