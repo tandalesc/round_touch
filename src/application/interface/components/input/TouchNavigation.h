@@ -1,23 +1,20 @@
 #ifndef _TOUCH_INPUT_COMPONENT_H_
 #define _TOUCH_INPUT_COMPONENT_H_
 
+#include <initializer_list>
 #include <vector>
 
-#include "src/application/eventbus/types/TouchEvent.h"
 #include "src/application/interface/components/types/Component.h"
+#include "src/application/interface/components/input/StateChangeRule.h"
+#include "src/application/eventbus/types/TouchEvent.h"
 
-struct StateChangeRule {
-  TouchEvent::Type type = TouchEvent::Unknown;
-  TouchEvent::Direction direction = TouchEvent::None;
-  TouchRegion region = {};
-  State newState;
-};
-
-class TouchInput : public Component {
+class TouchNavigation : public Component {
   std::vector<StateChangeRule> rules;
 
 public:
-  template <typename... T> TouchInput(T... rules) : rules{rules...} {};
+  TouchNavigation(StateChangeRule rule) : rules{rule} {};
+  TouchNavigation(std::initializer_list<StateChangeRule> rules)
+      : rules(rules) {};
 
   void handleEvent(TouchEvent &event) {
     for (StateChangeRule &rule : rules) {
@@ -32,6 +29,7 @@ public:
       }
       if (navigate) {
         app->workflow().navigate(rule.newState);
+        return;
       }
     }
   }

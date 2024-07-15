@@ -10,13 +10,14 @@ EventQueue<TouchEvent> &Application::touchEvents() {
 }
 
 void Application::init() {
+  touchEvents().subscribe(&interface());
   workflow().navigate(READY);
   Serial.println("Initialized Application.");
 }
 
-void Application::loop() {
-  interface().immediateProcess();
-  // processTouchEvents();
+void Application::loop() {  
+  processTouchEvents();
+  interface().deferredProcess();
 }
 
 // reads all touch events and adds them to the event queue.

@@ -7,7 +7,6 @@
 Interface::Interface(Application *app) : app(app) {
   this->app = app;
   manager = new ComponentManager(app);
-  app->touchEvents().subscribe(this);
 }
 
 Interface::~Interface() {
@@ -19,6 +18,7 @@ Interface::~Interface() {
 // only when a workflow change occurs. this allows for immediate
 // processing of any commands while creating the component. still
 // offers a decent amount of performance with deferred rendering.
+// DEPRECATED
 void Interface::immediateProcess() {
   bool render = false;
   // if workflow changed, trigger render
@@ -48,7 +48,7 @@ void Interface::deferredProcess() {
   // if workflow changed, trigger render
   if (workflow.hasChanges()) {
     workflow.applyChanges();
-    Serial.println("Something changed, re-rendering.");
+    // Serial.println("Something changed, re-rendering.");
     // create component and render.
     // if a component already exists, it will be disposed first
     manager->createComponent(workflow.getState());
@@ -56,4 +56,6 @@ void Interface::deferredProcess() {
   }
 }
 
-void Interface::handleEvent(TouchEvent &event) { manager->handleEvent(event); }
+void Interface::handleEvent(TouchEvent &event) {
+  manager->handleEvent(event);
+}

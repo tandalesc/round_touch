@@ -12,26 +12,26 @@ void ComponentManager::createComponent(State state) {
   if (state == NOT_STARTED) {
     active = DeviceNotStarted();
   } else if (state == ERROR) {
-    active = ErrorState(app);
+    active = ErrorState();
   } else if (state == READY) {
-    active = ReadyState(app);
+    active = ReadyState();
   } else if (state == ECOMODE) {
-    active = EcoModeState(app);
+    active = EcoModeState();
   } else if (state == INFO1) {
-    active = Info1State(app);
+    active = Info1State();
   } else if (state == INFO2) {
-    active = Info2State(app);
+    active = Info2State();
   } else if (state == INFO3) {
-    active = Info3State(app);
+    active = Info3State();
   } else if (state == DETAILS) {
-    active = DetailsState(app);
+    active = DetailsState();
   }
 }
 
 void ComponentManager::renderComponent() {
+  active->attachApplication(app);
   active->calculateSize();
   active->updateLayout(rootLayout);
-  // active->setupEventListeners(app);
   active->render(app);
 }
 

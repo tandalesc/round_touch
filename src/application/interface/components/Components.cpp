@@ -1,19 +1,22 @@
 #include "src/application/interface/components/Components.h"
 
+#include "src/application/interface/components/types/Layout.h"
+#include "src/application/interface/components/layout/FlexLayout.h"
+#include "src/application/interface/components/input/TouchNavigation.h"
+#include "src/application/interface/components/input/StateChangeRule.h"
+#include "src/application/interface/components/core/FillScreen.h"
+#include "src/application/interface/components/core/Text.h"
+
 RenderableComponent DeviceNotStarted() {
   Serial.println("Device not started.");
   delay(10000);
   return E(Component);
 }
 
-RenderableComponent ErrorState(Application *app) {
-  TouchScreen &touch = app->device()->touchscreen();
-  Workflow &workflow = app->workflow();
-  if (touch.available() && touch.gesture() == "SWIPE DOWN") {
-    workflow.navigate(READY);
-  }
+RenderableComponent ErrorState() {
   return (
     E(FillScreen, {BLACK},
+      E(TouchNavigation, onSwipeDown(READY)),
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
         E(Text, "Error!")
       )
@@ -24,14 +27,10 @@ RenderableComponent ErrorState(Application *app) {
 // READY INFO1 INFO2 INFO3
 // ECOMODE
 
-RenderableComponent EcoModeState(Application *app) {
-  TouchScreen &touch = app->device()->touchscreen();
-  Workflow &workflow = app->workflow();
-  if (touch.available() && touch.gesture() == "SWIPE DOWN") {
-    workflow.navigate(READY);
-  }
+RenderableComponent EcoModeState() {
   return (
     E(FillScreen, {.color = GREEN},
+      E(TouchNavigation, onSwipeUp(READY)),
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
         E(Text, {.color = BLACK}, "ECO Mode")
       )
@@ -39,46 +38,29 @@ RenderableComponent EcoModeState(Application *app) {
   );
 }
 
-RenderableComponent ReadyState(Application *app) {
-  TouchScreen &touch = app->device()->touchscreen();
-  Workflow &workflow = app->workflow();
-  if (touch.available()) {
-    if (touch.gesture() == "SINGLE CLICK") {
-      workflow.navigate(DETAILS);
-    } else if (touch.gesture() == "SWIPE UP") {
-      workflow.navigate(ECOMODE);
-    } else if (touch.gesture() == "SWIPE LEFT") {
-      workflow.navigate(INFO1);
-    }
-  }
+RenderableComponent ReadyState() {
   return (
     E(FillScreen, {BLACK},
+      E(TouchNavigation, {
+        onSwipeDown(ECOMODE),
+        onSwipeLeft(INFO1),
+        onTapAnywhere(DETAILS)
+      }),
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
         E(Text, "Details")
       )
-      // E(TouchInput,
-      //   { .type = TouchEvent::Swipe, .direction = TouchEvent::Down, .newState=ECOMODE },
-      //   { .type = TouchEvent::Swipe, .direction = TouchEvent::Left, .newState=INFO1 },
-      //   { .type = TouchEvent::Tap, .newState=DETAILS }
-      // )
     )
   );
 }
 
-RenderableComponent Info1State(Application *app) {
-  TouchScreen &touch = app->device()->touchscreen();
-  Workflow &workflow = app->workflow();
-  if (touch.available()) {
-    if (touch.gesture() == "SWIPE UP") {
-      workflow.navigate(ECOMODE);
-    } else if (touch.gesture() == "SWIPE LEFT") {
-      workflow.navigate(INFO2);
-    } else if (touch.gesture() == "SWIPE RIGHT") {
-      workflow.navigate(READY);
-    }
-  }
+RenderableComponent Info1State() {
   return (
     E(FillScreen, {BLACK},
+      E(TouchNavigation, {
+        onSwipeDown(ECOMODE),
+        onSwipeLeft(INFO2),
+        onSwipeRight(READY)
+      }),
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
         E(Text, "Gauges")
       )
@@ -86,20 +68,14 @@ RenderableComponent Info1State(Application *app) {
   );
 }
 
-RenderableComponent Info2State(Application *app) {
-  TouchScreen &touch = app->device()->touchscreen();
-  Workflow &workflow = app->workflow();
-  if (touch.available()) {
-    if (touch.gesture() == "SWIPE UP") {
-      workflow.navigate(ECOMODE);
-    } else if (touch.gesture() == "SWIPE LEFT") {
-      workflow.navigate(INFO3);
-    } else if (touch.gesture() == "SWIPE RIGHT") {
-      workflow.navigate(INFO1);
-    }
-  }
+RenderableComponent Info2State() {
   return (
     E(FillScreen, {BLACK},
+      E(TouchNavigation, {
+        onSwipeDown(ECOMODE),
+        onSwipeLeft(INFO3),
+        onSwipeRight(INFO1)
+      }),
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
         E(Text, "Tuning")
       )
@@ -107,18 +83,13 @@ RenderableComponent Info2State(Application *app) {
   );
 }
 
-RenderableComponent Info3State(Application *app) {
-  TouchScreen &touch = app->device()->touchscreen();
-  Workflow &workflow = app->workflow();
-  if (touch.available()) {
-    if (touch.gesture() == "SWIPE UP") {
-      workflow.navigate(ECOMODE);
-    } else if (touch.gesture() == "SWIPE RIGHT") {
-      workflow.navigate(INFO2);
-    }
-  }
+RenderableComponent Info3State() {
   return (
     E(FillScreen, {BLACK},
+      E(TouchNavigation, {
+        onSwipeDown(ECOMODE),
+        onSwipeRight(INFO2)
+      }),
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
         E(Text, "Settings")
       )
@@ -126,14 +97,10 @@ RenderableComponent Info3State(Application *app) {
   );
 }
 
-RenderableComponent DetailsState(Application *app) {
-  TouchScreen &touch = app->device()->touchscreen();
-  Workflow &workflow = app->workflow();
-  if (touch.available() && touch.gesture() == "SWIPE DOWN") {
-    workflow.navigate(READY);
-  }
+RenderableComponent DetailsState() {
   return (
     E(FillScreen, {BLACK},
+      E(TouchNavigation, onSwipeUp(READY)),
       E(FlexLayout, {.type = LayoutType::Column},
         E(FlexLayout, {.type = LayoutType::Row, .padding = {.l = 5}},
           E(FlexLayout, {.type = LayoutType::Column, .padding = {.t = 5}},
