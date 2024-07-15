@@ -4,8 +4,8 @@
 #include "src/device/types/TouchLocation.h"
 
 struct TouchEvent {
-  enum { Swipe, Tap, Unknown } type;
-  enum { None, Up, Down, Left, Right } direction = None;
+  enum Type { Swipe, Tap, Unknown } type;
+  enum Direction { None, Up, Down, Left, Right } direction = None;
   TouchLocation location = {};
   unsigned long timestamp = 0;
 };

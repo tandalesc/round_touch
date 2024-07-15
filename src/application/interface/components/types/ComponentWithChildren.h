@@ -1,6 +1,8 @@
 #ifndef _COMPONENT_WITH_CHILDREN_H_
 #define _COMPONENT_WITH_CHILDREN_H_
 
+#include <vector>
+
 #include "src/application/interface/components/types/Component.h"
 
 // helper implementation to deal with having multiple child components.

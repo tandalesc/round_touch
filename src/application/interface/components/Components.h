@@ -7,7 +7,7 @@
 #include "src/application/interface/components/types/Layout.h"
 
 #include "src/application/interface/components/layout/FlexLayout.h"
-#include "src/application/interface/components/input/SwipeInput.h"
+#include "src/application/interface/components/input/TouchInput.h"
 #include "src/application/interface/components/core/FillScreen.h"
 #include "src/application/interface/components/core/Text.h"
 

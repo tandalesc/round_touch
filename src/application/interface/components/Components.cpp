@@ -54,9 +54,13 @@ RenderableComponent ReadyState(Application *app) {
   return (
     E(FillScreen, {BLACK},
       E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, "Details"),
-        E(SwipeInput)
+        E(Text, "Details")
       )
+      // E(TouchInput,
+      //   { .type = TouchEvent::Swipe, .direction = TouchEvent::Down, .newState=ECOMODE },
+      //   { .type = TouchEvent::Swipe, .direction = TouchEvent::Left, .newState=INFO1 },
+      //   { .type = TouchEvent::Tap, .newState=DETAILS }
+      // )
     )
   );
 }
