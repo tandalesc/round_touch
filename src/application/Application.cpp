@@ -26,6 +26,9 @@ void Application::init() {
 void Application::loop() {  
   processTouchEvents();
   interface().refreshInterface();
+  // sleep for a bit, we don't need
+  // immediate updates
+  delay(20);
 }
 
 // reads all touch events and adds them to the event queue.
