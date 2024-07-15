@@ -14,13 +14,12 @@ struct StateChangeRule {
 };
 
 class TouchInput : public Component {
-  Application *app;
   std::vector<StateChangeRule> rules;
 
 public:
-  template <typename... T> TouchInput(T *...rules) : rules{rules...} {};
+  template <typename... T> TouchInput(T... rules) : rules{rules...} {};
 
-  void handleEvent(Application *app, TouchEvent &event) {
+  void handleEvent(TouchEvent &event) {
     for (StateChangeRule &rule : rules) {
       if (event.type != rule.type) {
         continue;
@@ -35,10 +34,6 @@ public:
         app->workflow().navigate(rule.newState);
       }
     }
-  }
-
-  void setupEventListeners(Application *app) override {
-    // app->touchEvents().subscribe(&TouchInput::handleEvent);
   }
 };
 

@@ -4,6 +4,17 @@
 #include "src/application/interface/components/ComponentManager.h"
 #include "src/application/interface/components/types/Component.h"
 
+Interface::Interface(Application *app) : app(app) {
+  this->app = app;
+  manager = new ComponentManager(app);
+  app->touchEvents().subscribe(this);
+}
+
+Interface::~Interface() {
+  // todo unsubscribe from touch events
+  delete manager;
+}
+
 // creates components every frame, but updates content of the screen
 // only when a workflow change occurs. this allows for immediate
 // processing of any commands while creating the component. still
@@ -19,7 +30,7 @@ void Interface::immediateProcess() {
   }
   // renderable component must always be deleted after using
   manager->createComponent(workflow.getState());
-  if(render) {
+  if (render) {
     manager->renderComponent();
   }
   manager->deleteComponent();
@@ -44,3 +55,5 @@ void Interface::deferredProcess() {
     manager->renderComponent();
   }
 }
+
+void Interface::handleEvent(TouchEvent &event) { manager->handleEvent(event); }

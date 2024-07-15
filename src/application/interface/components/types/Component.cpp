@@ -1,5 +1,9 @@
 #include "src/application/interface/components/types/Component.h"
 
+void Component::attachApplication(Application *app) {
+  this->app = app;
+}
+
 void Component::updateLayout(LayoutContext &layout) {
   // update position only.
   // rest of properties might be overridden for other purposes

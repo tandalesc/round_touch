@@ -31,7 +31,7 @@ void ComponentManager::createComponent(State state) {
 void ComponentManager::renderComponent() {
   active->calculateSize();
   active->updateLayout(rootLayout);
-  active->setupEventListeners(app);
+  // active->setupEventListeners(app);
   active->render(app);
 }
 
@@ -39,5 +39,11 @@ void ComponentManager::deleteComponent() {
   if (active != nullptr) {
     delete active;
     active = nullptr;
+  }
+}
+
+void ComponentManager::handleEvent(TouchEvent &event) {
+  if (active != nullptr) {
+    active->handleEvent(event);
   }
 }

@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "src/application/eventbus/EventHandler.h"
 #include "src/application/interface/components/types/Component.h"
 
 // helper implementation to deal with having multiple child components.
@@ -22,13 +23,16 @@ public:
   ComponentWithChildren(T *...children) : children{children...} {};
   // if the parent is being deleted, then so are all of its children
   ~ComponentWithChildren();
+  // by default, pass attach application call to all children
+  // and then call super class definition
+  void attachApplication(Application *app) override;
   // by default, just pass calculate size call to all children
   virtual void calculateSize() override;
   // by default, just pass update layout call to all children with no
   // modifications
   virtual void updateLayout(LayoutContext &layout) override;
   // by default, just pass setup event listeners call to all children
-  virtual void setupEventListeners(Application *app) override;
+  virtual void handleEvent(TouchEvent &event) override;
   // by default, just pass render call to all children
   virtual void render(Application *app) override;
 };

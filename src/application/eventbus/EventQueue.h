@@ -3,25 +3,29 @@
 
 #include <vector>
 
-template <typename T> using Callback = void (*)(T &);
+#include "src/application/eventbus/EventHandler.h"
 
 // basic generic message queue
 template <typename T> class EventQueue {
 private:
   std::vector<T> queue;
-  std::vector<Callback<T>> callbackQueue;
+  std::vector<EventHandler<T> *> eventHandlerQueue;
+
+  void notify(T &event) {
+    for (EventHandler<T> *eventHandler : eventHandlerQueue) {
+      eventHandler->handleEvent(event);
+    }
+  }
 
 public:
   void post(T event) {
     queue.push_back(event);
-    for (Callback<T> callback : callbackQueue) {
-      callback(event);
-    }
-  };
-  
-  void subscribe(Callback<T> callback) {
-    callbackQueue.push_back(callback);
-  };
+    notify(event);
+  }
+
+  void subscribe(EventHandler<T> *eventHandler) {
+    eventHandlerQueue.push_back(eventHandler);
+  }
 };
 
 #endif // _EVENT_QUEUE_H_

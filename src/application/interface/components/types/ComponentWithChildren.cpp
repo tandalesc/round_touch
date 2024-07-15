@@ -6,6 +6,13 @@ ComponentWithChildren::~ComponentWithChildren() {
   }
 }
 
+void ComponentWithChildren::attachApplication(Application *app) {
+  for (auto &child : children) {
+    child->attachApplication(app);
+  }
+  Component::attachApplication(app);
+}
+
 void ComponentWithChildren::calculateSize() {
   for (auto &child : children) {
     child->calculateSize();
@@ -18,9 +25,9 @@ void ComponentWithChildren::updateLayout(LayoutContext &layout) {
   }
 }
 
-void ComponentWithChildren::setupEventListeners(Application *app) {
+void ComponentWithChildren::handleEvent(TouchEvent &event) {
   for (auto &child : children) {
-    child->setupEventListeners(app);
+    child->handleEvent(event);
   }
 }
 
