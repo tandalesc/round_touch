@@ -23,6 +23,7 @@ private:
 public:
   Application(Device *device)
       : _device(device), _workflow(this), _interface(this) {};
+  ~Application();
   void init();
   void loop();
 

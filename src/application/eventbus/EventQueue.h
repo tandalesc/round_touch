@@ -1,15 +1,15 @@
 #ifndef _EVENT_QUEUE_H_
 #define _EVENT_QUEUE_H_
 
-#include <vector>
+#include <list>
 
 #include "src/application/eventbus/EventHandler.h"
 
 // basic generic message queue
 template <typename T> class EventQueue {
 private:
-  std::vector<T> queue;
-  std::vector<EventHandler<T> *> eventHandlerQueue;
+  std::list<T> queue;
+  std::list<EventHandler<T> *> eventHandlerQueue;
 
   void notify(T &event) {
     for (EventHandler<T> *eventHandler : eventHandlerQueue) {
@@ -25,6 +25,10 @@ public:
 
   void subscribe(EventHandler<T> *eventHandler) {
     eventHandlerQueue.push_back(eventHandler);
+  }
+
+  void unsubscribe(EventHandler<T> *eventHandler) {
+    eventHandlerQueue.remove(eventHandler);
   }
 };
 
