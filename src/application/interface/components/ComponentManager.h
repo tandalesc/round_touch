@@ -5,8 +5,8 @@
 class Application;
 class Component;
 
-#include "src/application/eventbus/EventHandler.h"
-#include "src/application/eventbus/types/TouchEvent.h"
+#include "src/events/EventHandler.h"
+#include "src/events/types/TouchEvent.h"
 #include "src/application/interface/components/types/Component.h"
 #include "src/application/interface/components/types/Layout.h"
 #include "src/application/workflow/Workflow.h"

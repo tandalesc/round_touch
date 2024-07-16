@@ -1,4 +1,4 @@
-#include "src/application/interface/components/Components.h"
+#include "src/application/workflow/ComponentLibrary.h"
 
 #include "src/application/interface/components/types/Layout.h"
 #include "src/application/interface/components/layout/FlexLayout.h"
@@ -6,6 +6,26 @@
 #include "src/application/interface/components/input/StateChangeRule.h"
 #include "src/application/interface/components/core/FillScreen.h"
 #include "src/application/interface/components/core/Text.h"
+
+RenderableComponent createComponentFromState(State state) {
+  if (state == NOT_STARTED) {
+    return DeviceNotStarted();
+  } else if (state == ERROR) {
+    return ErrorState();
+  } else if (state == READY) {
+    return ReadyState();
+  } else if (state == ECOMODE) {
+    return EcoModeState();
+  } else if (state == INFO1) {
+    return Info1State();
+  } else if (state == INFO2) {
+    return Info2State();
+  } else if (state == INFO3) {
+    return Info3State();
+  } else if (state == DETAILS) {
+    return DetailsState();
+  }
+}
 
 RenderableComponent DeviceNotStarted() {
   Serial.println("Device not started.");

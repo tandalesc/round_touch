@@ -1,3 +1,4 @@
+#include <math.h>
 #include "src/application/interface/components/layout/FlexLayout.h"
 
 void FlexLayout::calculateSize() {
