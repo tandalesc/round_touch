@@ -25,35 +25,13 @@ This library relies on recent C++ features to work properly. See included
 
 ```text
 Device
-    Application
-        Workflow
-        Interface
-            Components...
     Events...
     Device Drivers...
-```
-
-### Interface Components
-
-More functionality is planned in the future.
-
-```text
-Component
-    TouchNavigation
-    Text
-    ComponentWithChildren
-        FillScreen
-        FlexLayout
-```
-
-### Events
-
-```text
-EventQueue<Event>
-    EventHandler<Event>
-    Event
-        TouchEvent
-        WorkflowEvent
+Application(&device)
+    Workflow
+    Interface //handles Touch and Workflow events
+        ComponentManager //handles Touch events
+        Components...
 ```
 
 ### Device Drivers
@@ -67,6 +45,29 @@ Device
         SDFileSystemClass
     TouchScreen
         CST816S
+```
+
+### Interface Components
+
+More functionality is planned in the future.
+
+```text
+Component //uses gfx to render on screen
+    TouchNavigation
+    Text
+    ComponentWithChildren
+        FillScreen
+        FlexLayout
+```
+
+### Events
+
+```text
+EventQueue<Event> //supports sub,unsub,post
+    EventHandler<Event>
+    Event
+        TouchEvent
+        WorkflowEvent
 ```
 
 [makerfabslink]: https://github.com/Makerfabs/ESP32-S3-Round-SPI-TFT-with-Touch-1.28/tree/main
