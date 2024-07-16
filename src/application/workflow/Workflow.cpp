@@ -10,7 +10,7 @@ bool Workflow::canNavigate(State newState) {
   if (newState == NOT_STARTED) {
     return false;
   }
-  if (millis() < debounceTimerMs) {
+  if (debounceTimer.running()) {
     return false;
   }
   return newState != this->state;
@@ -20,14 +20,9 @@ void Workflow::navigate(State newState) {
   if (!canNavigate(newState)) {
     return;
   }
-  pauseNavigation();
+  debounceTimer.start();
   prevState = state;
   state = newState;
-  app->workflowEvents().post(
-      {.from = prevState, .to = state, .timestamp = millis()});
-}
-
-// prevent navigation from firing repeatedly
-void Workflow::pauseNavigation() {
-  debounceTimerMs = millis() + debounceTimeoutMs;
+  WorkflowEvent event = {.from = prevState, .to = state, .timestamp = millis()};
+  app->workflowEvents().post(event);
 }
