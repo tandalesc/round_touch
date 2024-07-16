@@ -27,10 +27,11 @@ This library relies on recent C++ features to work properly. See included
 Device
     Events...
     Device Drivers...
+
 Application(&device)
     Workflow
     Interface //handles Touch and Workflow events
-        ComponentManager //handles Touch events
+        ComponentManager //propagates Touch events
         Components...
 ```
 
@@ -49,7 +50,8 @@ Device
 
 ### Interface Components
 
-More functionality is planned in the future.
+Main design motive was to create a declarative UI that can easily be
+changed or made dynamic. More functionality is planned in the future.
 
 ```text
 Component //uses gfx to render on screen
@@ -61,6 +63,9 @@ Component //uses gfx to render on screen
 ```
 
 ### Events
+
+Main design motive was to create a light-weight event model that can
+easily be added to without needing major refactoring.
 
 ```text
 EventQueue<Event> //supports sub,unsub,post
