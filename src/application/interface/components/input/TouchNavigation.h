@@ -6,7 +6,7 @@
 
 #include "src/application/interface/components/types/Component.h"
 #include "src/application/interface/components/input/StateChangeRule.h"
-#include "src/application/eventbus/types/TouchEvent.h"
+#include "src/events/types/TouchEvent.h"
 
 class TouchNavigation : public Component {
   std::vector<StateChangeRule> rules;

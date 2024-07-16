@@ -23,9 +23,15 @@ void Application::init() {
   Serial.println("Initialized Application.");
 }
 
+Application::~Application() {
+  // unsubscribe interface from events at the end of lifecycle
+  touchEvents().unsubscribe(&interface());
+  workflowEvents().unsubscribe(&interface());
+}
+
 void Application::loop() {  
   processTouchEvents();
-  interface().refreshInterface();
+  interface().loop();
   // sleep for a bit, we don't need
   // immediate updates
   delay(20);

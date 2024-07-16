@@ -1,9 +1,6 @@
 #ifndef _CORE_FLEX_LAYOUT_H_
 #define _CORE_FLEX_LAYOUT_H_
 
-#include <math.h>
-#include <vector>
-
 #include "src/application/interface/components/types/ComponentWithChildren.h"
 
 class FlexLayout : public ComponentWithChildren {

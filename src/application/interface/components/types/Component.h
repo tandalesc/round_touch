@@ -2,7 +2,7 @@
 #define _COMPONENT_TYPES_H_
 
 #include "src/application/Application.h"
-#include "src/application/eventbus/EventHandler.h"
+#include "src/events/EventHandler.h"
 #include "src/application/interface/components/types/Layout.h"
 
 // helper define so you don't need the "new" keyword everywhere

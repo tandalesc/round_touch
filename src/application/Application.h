@@ -6,9 +6,9 @@
 #include "src/application/interface/Interface.h"
 #include "src/application/workflow/Workflow.h"
 
-#include "src/application/eventbus/EventQueue.h"
-#include "src/application/eventbus/types/TouchEvent.h"
-#include "src/application/eventbus/types/WorkflowEvent.h"
+#include "src/events/EventQueue.h"
+#include "src/events/types/TouchEvent.h"
+#include "src/events/types/WorkflowEvent.h"
 
 class Application {
 private:
@@ -23,6 +23,7 @@ private:
 public:
   Application(Device *device)
       : _device(device), _workflow(this), _interface(this) {};
+  ~Application();
   void init();
   void loop();
 

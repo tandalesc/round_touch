@@ -4,9 +4,9 @@
 // forward declaration to avoid circular references
 class Application;
 
-#include "src/application/eventbus/EventHandler.h"
-#include "src/application/eventbus/types/TouchEvent.h"
-#include "src/application/eventbus/types/WorkflowEvent.h"
+#include "src/events/EventHandler.h"
+#include "src/events/types/TouchEvent.h"
+#include "src/events/types/WorkflowEvent.h"
 #include "src/application/interface/components/ComponentManager.h"
 
 class Interface : public EventHandler<TouchEvent>,
@@ -20,7 +20,7 @@ public:
   Interface(Application *app);
   ~Interface();
 
-  void refreshInterface();
+  void loop();
   void handleEvent(TouchEvent &event);
   void handleEvent(WorkflowEvent &event);
 };

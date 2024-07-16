@@ -12,13 +12,12 @@ Interface::Interface(Application *app) {
 // this automatically deletes the components contained within
 Interface::~Interface() { delete manager; }
 
-void Interface::refreshInterface() {
-  if (!refresh) {
-    return;
+void Interface::loop() {
+  if (refresh) {
+    manager->createComponent(app->workflow().getState());
+    manager->renderComponent();
+    refresh = false;
   }
-  manager->createComponent(app->workflow().getState());
-  manager->renderComponent();
-  refresh = false;
 }
 
 void Interface::handleEvent(TouchEvent &event) {

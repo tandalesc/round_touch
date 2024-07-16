@@ -1,9 +1,10 @@
-#ifndef _COMPONENTS_H_
-#define _COMPONENTS_H_
-
-#include "src/application/Application.h"
+#ifndef _COMPONENT_LIBRARY_H_
+#define _COMPONENT_LIBRARY_H_
 
 #include "src/application/interface/components/types/Component.h"
+#include "src/application/workflow/Workflow.h"
+
+RenderableComponent createComponentFromState(State state);
 
 RenderableComponent DeviceNotStarted();
 RenderableComponent ErrorState();
@@ -14,4 +15,4 @@ RenderableComponent Info2State();
 RenderableComponent Info3State();
 RenderableComponent DetailsState();
 
-#endif // _COMPONENTS_H_
+#endif // _COMPONENT_LIBRARY_H_

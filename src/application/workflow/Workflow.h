@@ -1,6 +1,8 @@
 #ifndef _WORKFLOW_H_
 #define _WORKFLOW_H_
 
+#include "src/util/Timer.h"
+
 class Application;
 
 enum State { NOT_STARTED, ERROR, READY, INFO1, INFO2, INFO3, ECOMODE, DETAILS };
@@ -10,14 +12,11 @@ private:
   Application *app;
   State state = NOT_STARTED;
   State prevState = NOT_STARTED;
-  // debounce navigate calls
-  const unsigned long debounceTimeoutMs = 100;
-  unsigned long debounceTimerMs = 0;
-  void pauseNavigation();
+  Timer debounceTimer{100};
 
 public:
-  Workflow(Application *app): app(app) {};
-  
+  Workflow(Application *app) : app(app) {};
+
   State getState();
   bool canNavigate(State newState);
   void navigate(State newState);
