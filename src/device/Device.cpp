@@ -24,6 +24,33 @@ void Device::showSplashScreen() {
   delay(2000);
 }
 
+void Device::pollEvent(EventHandler<TouchEvent> &handler) {
+  TouchScreen &touch = touchscreen();
+  if (!touch.available()) {
+    return;
+  }
+  TouchEvent event = {.type = TouchEvent::Unknown, .timestamp = millis()};
+  String gesture = touch.gesture();
+  if (gesture == "SINGLE CLICK") {
+    event.type = TouchEvent::Tap;
+    event.location = touch.location();
+  } else if (gesture == "SWIPE UP" || gesture == "SWIPE DOWN" ||
+             gesture == "SWIPE LEFT" || gesture == "SWIPE RIGHT") {
+    event.type = TouchEvent::Swipe;
+    if (gesture == "SWIPE UP") {
+      // swap down and up to match hardware
+      event.direction = TouchEvent::Down;
+    } else if (gesture == "SWIPE DOWN") {
+      event.direction = TouchEvent::Up;
+    } else if (gesture == "SWIPE LEFT") {
+      event.direction = TouchEvent::Left;
+    } else if (gesture == "SWIPE RIGHT") {
+      event.direction = TouchEvent::Right;
+    }
+  }
+  handler.handleEvent(event);
+}
+
 // Hardware
 Display &Device::display() { return Display::getInstance(); }
 TouchScreen &Device::touchscreen() { return TouchScreen::getInstance(); }

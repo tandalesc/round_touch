@@ -6,7 +6,7 @@
 #include "src/events/EventHandler.h"
 
 // basic generic message queue
-template <typename T> class EventQueue {
+template <typename T> class EventQueue : public EventHandler<T> {
 private:
   std::list<T> queue;
   std::list<EventHandler<T> *> eventHandlerQueue;
@@ -30,6 +30,8 @@ public:
   void unsubscribe(EventHandler<T> *eventHandler) {
     eventHandlerQueue.remove(eventHandler);
   }
+
+  void handleEvent(T &event) { post(event); }
 };
 
 #endif // _EVENT_QUEUE_H_

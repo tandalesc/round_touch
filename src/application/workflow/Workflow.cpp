@@ -24,5 +24,5 @@ void Workflow::navigate(State newState) {
   prevState = state;
   state = newState;
   WorkflowEvent event = {.from = prevState, .to = state, .timestamp = millis()};
-  app->workflowEvents().post(event);
+  app->eventhub().handleEvent(event);
 }
