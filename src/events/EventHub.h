@@ -9,7 +9,6 @@ private:
   EventQueue<WorkflowEvent> _workflowEventQueue;
 
 public:
-  void handleEvent(TouchEvent &event) { _touchEventQueue.post(event); }
   void handleEvent(WorkflowEvent &event) { _workflowEventQueue.post(event); }
 
   EventQueue<WorkflowEvent> &workflowEvents() { return _workflowEventQueue; }
