@@ -4,13 +4,15 @@
 #include <CST816S.h>
 
 #include "src/device/types/TouchLocation.h"
+#include "src/events/EventSource.h"
+#include "src/events/types/TouchEvent.h"
 
 #define TOUCH_SDA 38
 #define TOUCH_SCL 39
 #define TOUCH_RST 16
 #define TOUCH_INT 40
 
-class TouchScreen {
+class TouchScreen : public EventSource<InputEvent> {
 private:
   CST816S *driver;
   TouchScreen() {
@@ -27,26 +29,12 @@ public:
   TouchScreen(TouchScreen const &) = delete;
   void operator=(TouchScreen const &) = delete;
 
-  bool available() { return driver->available(); }
-  String gesture() { return driver->gesture(); }
-  TouchLocation location() {
-    TouchLocation location = {driver->data.x, driver->data.y};
-    return location;
-  }
-  void printDebugMessage() {
-    if (this->available()) {
-      TouchLocation location = this->location();
-      Serial.print(this->gesture());
-      // Serial.print("\t");
-      // Serial.print(touch.data.points);
-      // Serial.print("\t");
-      // Serial.print(touch.data.event);
-      Serial.print("\t");
-      Serial.print(location.x);
-      Serial.print("\t");
-      Serial.println(location.y);
-    }
-  }
+  bool available();
+  String gesture();
+  TouchLocation location();
+  void printDebugMessage();
+
+  void pollEvent(EventHandler<InputEvent> *handler);
 };
 
 #endif // _TOUCH_H_

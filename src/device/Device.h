@@ -9,11 +9,7 @@
 
 #include "src/lib/jpeg/JpegFunctions.h"
 
-#include "src/events/EventHandler.h"
-#include "src/events/EventSource.h"
-#include "src/events/types/TouchEvent.h"
-
-class Device: public EventSource<TouchEvent> {
+class Device {
 private:
   void showSplashScreen();
 
@@ -21,8 +17,6 @@ public:
   void init();
   void showMessage(const char *msg);
 
-  void pollEvent(EventHandler<TouchEvent> &handler);
-  
   Display &display();
   TouchScreen &touchscreen();
   SDCard &sdcard();

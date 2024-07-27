@@ -32,7 +32,7 @@ public:
   // modifications
   virtual void updateLayout(LayoutContext &layout) override;
   // by default, just pass setup event listeners call to all children
-  virtual void handleEvent(TouchEvent &event) override;
+  virtual void handleEvent(InputEvent &event) override;
   // by default, just pass render call to all children
   virtual void render(Application *app) override;
 };

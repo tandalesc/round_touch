@@ -8,10 +8,10 @@ Interface &Application::interface() { return _interface; }
 EventHub &Application::eventhub() { return _eventhub; }
 
 void Application::init() {
-  // subscribe interface to touch and workflow events
-  // this way the interface will directly receive events
-  // and can handle them directly
-  eventhub().touchEvents().subscribe(&interface());
+  // subscribe interface to workflow events
+  // the interface will directly receive event information
+  // as soon as it happens without needing to periodically
+  // refresh.
   eventhub().workflowEvents().subscribe(&interface());
   // kick start application by navigating to first state
   workflow().navigate(READY);
@@ -20,15 +20,18 @@ void Application::init() {
 
 Application::~Application() {
   // unsubscribe interface from events at the end of lifecycle
-  eventhub().touchEvents().unsubscribe(&interface());
   eventhub().workflowEvents().unsubscribe(&interface());
 }
 
 void Application::loop() {
-  // poll for new touch events
-  device()->pollEvent(eventhub().touchEvents());
+  // our device has a touch screen which produces
+  // touch events. since this is a very high volume event stream
+  // poll for new events and pass them to the interface
+  // when we have processing time, instead of subscribing
+  // directly to the event stream.
+  device()->touchscreen().pollEvent(&interface());
+  // if there is anything new to show, refresh the interface
   interface().loop();
-  // sleep for a bit, we don't need
-  // immediate updates
+  // sleep for a bit, we don't need immediate updates
   delay(20);
 }

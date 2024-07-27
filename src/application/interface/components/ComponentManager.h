@@ -6,12 +6,12 @@ class Application;
 class Component;
 
 #include "src/events/EventHandler.h"
-#include "src/events/types/TouchEvent.h"
+#include "src/events/types/InputEvent.h"
 #include "src/application/interface/components/types/Component.h"
 #include "src/application/interface/components/types/Layout.h"
 #include "src/application/workflow/Workflow.h"
 
-class ComponentManager : public EventHandler<TouchEvent> {
+class ComponentManager : public EventHandler<InputEvent> {
 private:
   Application *app;
   Component *active = nullptr;
@@ -27,7 +27,7 @@ public:
   void deleteComponent();
 
   // event handling
-  void handleEvent(TouchEvent &event);
+  void handleEvent(InputEvent &event);
 };
 
 #endif // _COMPONENT_MANAGER_H_

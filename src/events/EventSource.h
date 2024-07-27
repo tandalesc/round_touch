@@ -4,5 +4,5 @@
 
 template <typename T> class EventSource {
 public:
-  virtual void pollEvent(EventHandler<T> &handler) = 0;
+  virtual void pollEvent(EventHandler<T> *handler) = 0;
 };

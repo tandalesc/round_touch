@@ -4,8 +4,8 @@
 #include <initializer_list>
 #include <vector>
 
-#include "src/application/interface/components/types/Component.h"
 #include "src/application/interface/components/input/StateChangeRule.h"
+#include "src/application/interface/components/types/Component.h"
 #include "src/events/types/TouchEvent.h"
 
 class TouchNavigation : public Component {
@@ -16,16 +16,22 @@ public:
   TouchNavigation(std::initializer_list<StateChangeRule> rules)
       : rules(rules) {};
 
-  void handleEvent(TouchEvent &event) {
+  void handleEvent(InputEvent &event) {
+    if (event.inputType != InputType::TouchInput) {
+      return;
+    }
+    TouchEvent &tevent = static_cast<TouchEvent &>(event);
     for (StateChangeRule &rule : rules) {
-      if (event.type != rule.type) {
+      if (tevent.type != rule.type) {
         continue;
       }
       bool navigate = false;
-      if (event.type == TouchEvent::Swipe) {
-        navigate = event.direction == rule.direction;
-      } else if (event.type == TouchEvent::Tap) {
-        navigate = rule.region.contains(event.location);
+      if (tevent.type == TouchType::SwipeType) {
+        SwipeTouchEvent &sevent = static_cast<SwipeTouchEvent &>(event);
+        navigate = sevent.direction == rule.direction;
+      } else if (tevent.type == TouchType::TapType) {
+        TapTouchEvent &ttevent = static_cast<TapTouchEvent &>(event);
+        navigate = rule.region.contains(ttevent.location);
       }
       if (navigate) {
         app->workflow().navigate(rule.newState);

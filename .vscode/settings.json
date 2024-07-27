@@ -43,6 +43,9 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "type_traits": "cpp"
+        "type_traits": "cpp",
+        "compare": "cpp",
+        "functional": "cpp",
+        "utility": "cpp"
     }
 }

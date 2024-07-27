@@ -27,7 +27,7 @@ void ComponentManager::deleteComponent() {
   }
 }
 
-void ComponentManager::handleEvent(TouchEvent &event) {
+void ComponentManager::handleEvent(InputEvent &event) {
   if (active != nullptr) {
     active->handleEvent(event);
   }
