@@ -18,7 +18,7 @@ struct Size {
 };
 
 enum class LayoutType { Row, Column, None };
-enum class Align { Left, Right, Center };
+enum class Align { Start, End, Center };
 
 struct ContainerProps {
   Position position = {};
@@ -29,7 +29,8 @@ struct ContainerProps {
 
 struct LayoutContext {
   LayoutType type = LayoutType::None;
-  Align align = Align::Left;
+  Align major = Align::Start;
+  Align minor = Align::Start;
   int gap = 0;
   Position padding = {};
   ContainerProps props = {};

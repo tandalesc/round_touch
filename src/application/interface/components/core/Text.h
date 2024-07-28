@@ -24,7 +24,10 @@ public:
     layout.props.preferredSize = layout.props.size;
   }
 
-  void calculateSize(LayoutContext &layout) override { initializeSize(); }
+  void calculateSize(LayoutContext &layout) override {
+    initializeSize();
+    this->layout.props.preferredSize = layout.props.preferredSize - layout.padding;
+  }
 
   void render(Application *app) override {
     auto gfx = app->device()->display().gfx;
