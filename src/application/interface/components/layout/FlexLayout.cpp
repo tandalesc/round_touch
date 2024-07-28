@@ -3,7 +3,7 @@
 
 void FlexLayout::calculateSize(LayoutContext &layout) {
   ComponentWithChildren::calculateSize(layout);
-  // calculate new size
+  // calculate new size by visiting all children
   Size newSize;
   for (auto *child : this->children) {
     Size childSize = child->layout.props.size;
@@ -23,7 +23,8 @@ void FlexLayout::calculateSize(LayoutContext &layout) {
   }
   // update size and preferred size
   this->layout.props.size = newSize;
-  this->layout.props.preferredSize = derived.props.preferredSize;
+  this->layout.props.preferredSize =
+      layout.props.preferredSize - layout.padding;
   if (this->layout.type == LayoutType::Row) {
     this->layout.props.preferredSize.height = newSize.height;
   } else if (this->layout.type == LayoutType::Column) {
