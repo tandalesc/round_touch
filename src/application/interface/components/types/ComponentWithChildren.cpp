@@ -13,9 +13,9 @@ void ComponentWithChildren::attachApplication(Application *app) {
   Component::attachApplication(app);
 }
 
-void ComponentWithChildren::calculateSize() {
+void ComponentWithChildren::calculateSize(LayoutContext &layout) {
   for (auto &child : children) {
-    child->calculateSize();
+    child->calculateSize(layout);
   }
 }
 

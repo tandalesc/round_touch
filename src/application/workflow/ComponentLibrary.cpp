@@ -37,7 +37,7 @@ RenderableComponent ErrorState() {
   return (
     E(FillScreen, {BLACK},
       E(TouchNavigation, onSwipeDown(READY)),
-      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+      E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
         E(Text, "Error!")
       )
     )
@@ -51,7 +51,7 @@ RenderableComponent EcoModeState() {
   return (
     E(FillScreen, {.color = GREEN},
       E(TouchNavigation, onSwipeUp(READY)),
-      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+      E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
         E(Text, {.color = BLACK}, "ECO Mode")
       )
     )
@@ -66,8 +66,13 @@ RenderableComponent ReadyState() {
         onSwipeLeft(INFO1),
         onTapAnywhere(DETAILS)
       }),
-      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
-        E(Text, "Details")
+      E(FlexLayout, {.type=LayoutType::Column, .props = {.gap = 5},},
+        E(FlexLayout, {.type=LayoutType::Row, .align=Align::Center},
+          E(Text, {.size = 3}, "Home")
+        ),
+        E(FlexLayout, {.type=LayoutType::Row, .align=Align::Center},
+          E(Text, {.size = 2}, "Tap to see more")
+        )
       )
     )
   );
@@ -81,7 +86,7 @@ RenderableComponent Info1State() {
         onSwipeLeft(INFO2),
         onSwipeRight(READY)
       }),
-      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+      E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
         E(Text, "Gauges")
       )
     )
@@ -96,7 +101,7 @@ RenderableComponent Info2State() {
         onSwipeLeft(INFO3),
         onSwipeRight(INFO1)
       }),
-      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+      E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
         E(Text, "Tuning")
       )
     )
@@ -110,7 +115,7 @@ RenderableComponent Info3State() {
         onSwipeDown(ECOMODE),
         onSwipeRight(INFO2)
       }),
-      E(FlexLayout, {.padding = {.t = 20, .l = 20}},
+      E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
         E(Text, "Settings")
       )
     )
@@ -121,17 +126,24 @@ RenderableComponent DetailsState() {
   return (
     E(FillScreen, {BLACK},
       E(TouchNavigation, onSwipeUp(READY)),
-      E(FlexLayout, {.type = LayoutType::Column},
-        E(FlexLayout, {.type = LayoutType::Row, .padding = {.l = 5}},
-          E(Text, {.size = 3}, "2002"),
-          E(FlexLayout, {.type = LayoutType::Column, .padding = {.l = 5}},
-            E(Text, {.size = 2}, "Mazda Miata"),
+      E(FlexLayout, {.type = LayoutType::Column, .props = {.gap = 8}},
+        E(FlexLayout, {.type = LayoutType::Column, .props = {.gap = 1}},
+          E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
+            E(Text, {.size = 3}, "Details")
+          )
+        ),
+        E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
+          E(FlexLayout, {.type = LayoutType::Column, .props = {.gap = 5}},
+            E(Text, {.size = 2}, "2002 Mazda Miata"),
             E(Text, {.size = 2}, "1.8L Stock")
           )
         ),
-        E(FlexLayout, {.type = LayoutType::Column, .padding = {.t = 5, .l = 12}},
-          E(Text, {.size = 2}, "Special Edition"),
-          E(Text, {.size = 2}, "6 Speed")
+        E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
+          E(FlexLayout, {.type = LayoutType::Column, .props = {.gap = 5}},
+            E(Text, {.size = 2}, "- Special Edition"),
+            E(Text, {.size = 2}, "- 6 Speed"),
+            E(Text, {.size = 2}, "- Torsen LSD")
+          )
         )
       )
     )

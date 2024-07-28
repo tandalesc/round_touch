@@ -14,14 +14,17 @@ class Text : public Component {
 
 public:
   Text(TextProps props, const char *text) : props(props), text(text) {
-    this->calculateSize();
+    this->initializeSize();
   };
   Text(const char *text) : Text({}, text) {};
 
-  void calculateSize() override {
+  void initializeSize() {
     layout.size.width = strlen(text) * 6 * props.size;
-    layout.size.height = 12 * props.size;
+    layout.size.height = 8 * props.size;
+    layout.preferredSize = layout.size;
   }
+
+  void calculateSize(LayoutContext &layout) override { initializeSize(); }
 
   void render(Application *app) override {
     auto gfx = app->device()->display().gfx;

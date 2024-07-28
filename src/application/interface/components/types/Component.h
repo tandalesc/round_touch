@@ -22,7 +22,7 @@ struct Component : public EventHandler<InputEvent> {
   // required for layout calculations
   // only needed if this component takes up space in the layout
   // or has children that need their layouts updated
-  virtual void calculateSize() {};
+  virtual void calculateSize(LayoutContext &layout) {};
   // required for layout calculations
   // only needed if this component has children that need their
   // layouts updated

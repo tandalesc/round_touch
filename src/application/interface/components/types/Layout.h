@@ -17,14 +17,19 @@ enum class LayoutType { Row, Column, None };
 
 struct LayoutProps {
   int index = 0;
+  int gap = 0;
 };
+
+enum class Align { Left, Right, Center };
 
 struct LayoutContext {
   LayoutType type = LayoutType::None;
+  Align align = Align::Left;
   LayoutProps props = {};
   Position padding = {};
   Position position = {};
   Size size = {};
+  Size preferredSize = {};
 };
 
 LayoutContext deriveLayout(LayoutContext &parent);
