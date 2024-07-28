@@ -1,7 +1,7 @@
 #ifndef _CORE_FLEX_LAYOUT_H_
 #define _CORE_FLEX_LAYOUT_H_
 
-#define DRAW_DEBUG true
+#define DRAW_DEBUG false
 
 #include "src/application/interface/components/types/ComponentWithChildren.h"
 
