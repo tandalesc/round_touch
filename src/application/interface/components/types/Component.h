@@ -2,7 +2,7 @@
 #define _COMPONENT_TYPES_H_
 
 #include "src/application/Application.h"
-#include "src/application/interface/components/types/Layout.h"
+#include "src/application/interface/layout/LayoutContext.h"
 #include "src/events/EventHandler.h"
 #include "src/events/types/InputEvent.h"
 

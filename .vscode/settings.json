@@ -46,6 +46,7 @@
         "type_traits": "cpp",
         "compare": "cpp",
         "functional": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "random": "cpp"
     }
 }

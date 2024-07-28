@@ -19,16 +19,17 @@ public:
   Text(const char *text) : Text({}, text) {};
 
   void initializeSize() {
-    layout.size.width = strlen(text) * 6 * props.size;
-    layout.size.height = 8 * props.size;
-    layout.preferredSize = layout.size;
+    layout.props.size.width = strlen(text) * 6 * props.size;
+    layout.props.size.height = 8 * props.size;
+    layout.props.preferredSize = layout.props.size;
   }
 
   void calculateSize(LayoutContext &layout) override { initializeSize(); }
 
   void render(Application *app) override {
     auto gfx = app->device()->display().gfx;
-    gfx->setCursor(layout.position.l, layout.position.t);
+    Location cursor(layout.props.position);
+    gfx->setCursor(cursor.x, cursor.y);
     gfx->setTextSize(props.size);
     gfx->setTextColor(props.color);
     gfx->print(text);

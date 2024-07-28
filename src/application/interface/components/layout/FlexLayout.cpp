@@ -2,71 +2,77 @@
 #include <math.h>
 
 void FlexLayout::calculateSize(LayoutContext &layout) {
-  int width = 0, height = 0;
   LayoutContext derived = deriveLayout(layout);
-  this->layout.preferredSize = derived.preferredSize;
+  // calculate new size
+  Size newSize;
   for (auto *child : this->children) {
     child->calculateSize(derived);
+    Size childSize = child->layout.props.size;
+    Size childPreferredSize = child->layout.props.size;
     if (this->layout.type == LayoutType::Row) {
-      width += child->layout.size.width + this->layout.props.gap;
+      newSize.width += childSize.width + this->layout.gap;
       // use size instead of preferredSize for row
       // TODO find a better solution
-      height = max(height, child->layout.size.height);
+      newSize.height = max(newSize.height, childSize.height);
     } else if (this->layout.type == LayoutType::Column) {
-      width = max(width, child->layout.preferredSize.width);
-      height += child->layout.size.height + this->layout.props.gap;
+      newSize.width = max(newSize.width, childPreferredSize.width);
+      newSize.height += childSize.height + this->layout.gap;
     } else {
-      width = max(width, child->layout.preferredSize.width);
-      height = max(height, child->layout.preferredSize.height);
+      newSize.width = max(newSize.width, childPreferredSize.width);
+      newSize.height = max(newSize.height, childPreferredSize.height);
     }
   }
-  this->layout.size = {width, height};
+  // update size and preferred size
+  this->layout.props.size = newSize;
+  this->layout.props.preferredSize = derived.props.preferredSize;
   if (this->layout.type == LayoutType::Row) {
-    this->layout.preferredSize.height = height;
+    this->layout.props.preferredSize.height = newSize.height;
   } else if (this->layout.type == LayoutType::Column) {
-    this->layout.preferredSize.width = width;
+    this->layout.props.preferredSize.width = newSize.width;
   } else {
-    this->layout.preferredSize = this->layout.size;
+    this->layout.props.preferredSize = newSize;
   }
 }
 
 void FlexLayout::updateLayout(LayoutContext &layout) {
   // update position based on derived position from parent
   LayoutContext derived = deriveLayout(layout);
-  this->layout.position = this->initial.position + derived.position;
+  this->layout.props.position =
+      this->initial.props.position + derived.props.position;
   this->layout.props.index = derived.props.index;
   // copy context for application to layout elements
-  LayoutContext childLayout = this->layout;
+  LayoutContext &childContext = this->layout;
+  ContainerProps &childProps = childContext.props;
   // tweak initial position depending on layout props
   if (this->layout.type == LayoutType::Row ||
       this->layout.type == LayoutType::None) {
     if (this->layout.align == Align::Right) {
-      childLayout.position.l += childLayout.preferredSize.width;
+      childProps.position.l += childProps.preferredSize.width;
     } else if (this->layout.align == Align::Center) {
-      childLayout.position.l +=
-          childLayout.preferredSize.width / 2 - childLayout.size.width / 2;
+      childProps.position.l +=
+          childProps.preferredSize.width / 2 - childProps.size.width / 2;
     }
   }
   for (int i = 0; i < this->children.size(); i++) {
     auto *child = this->children[i];
-    childLayout.props.index = i;
+    childProps.index = i;
     // update position and pass modified layout context to props
     if (this->layout.type == LayoutType::Row ||
         this->layout.type == LayoutType::None) {
       if (this->layout.align == Align::Left ||
           this->layout.align == Align::Center) {
-        child->updateLayout(childLayout);
-        childLayout.position.l +=
-            child->layout.size.width + this->layout.props.gap;
+        child->updateLayout(childContext);
+        childProps.position.l +=
+            child->layout.props.size.width + this->layout.gap;
       } else if (this->layout.align == Align::Right) {
-        childLayout.position.l -=
-            child->layout.size.width + this->layout.props.gap;
-        child->updateLayout(childLayout);
+        childProps.position.l -=
+            child->layout.props.size.width + this->layout.gap;
+        child->updateLayout(childContext);
       }
     } else if (this->layout.type == LayoutType::Column) {
-      child->updateLayout(childLayout);
-      childLayout.position.t +=
-          child->layout.size.height + this->layout.props.gap;
+      child->updateLayout(childContext);
+      childProps.position.t +=
+          child->layout.props.size.height + this->layout.gap;
     }
   }
 }

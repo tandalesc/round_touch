@@ -20,8 +20,9 @@ void ComponentWithChildren::calculateSize(LayoutContext &layout) {
 }
 
 void ComponentWithChildren::updateLayout(LayoutContext &layout) {
+  LayoutContext derived = deriveLayout(layout);
   for (auto &child : children) {
-    child->updateLayout(layout);
+    child->updateLayout(derived);
   }
 }
 

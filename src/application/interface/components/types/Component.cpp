@@ -6,13 +6,12 @@ void Component::updateLayout(LayoutContext &layout) {
   // update position only.
   // rest of properties might be overridden for other purposes
   LayoutContext derived = deriveLayout(layout);
-  this->layout.position = derived.position;
+  this->layout.props.position = derived.props.position;
 }
 
 void Component::drawDebugBounds(Application *app) {
+  Size sizeIncludingPadding = layout.props.preferredSize + layout.padding;
   app->device()->display().gfx->drawRect(
-      layout.position.l,
-      layout.position.t,
-      layout.preferredSize.width + layout.padding.l + layout.padding.r,
-      layout.preferredSize.height + layout.padding.t + layout.padding.b, RED);
+      layout.props.position.l, layout.props.position.t,
+      sizeIncludingPadding.width, sizeIncludingPadding.height, RED);
 }
