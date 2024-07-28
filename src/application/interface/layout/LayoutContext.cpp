@@ -16,6 +16,10 @@ Size Size::operator-(const Position &a) {
   return {width - a.l - a.r, height - a.t - a.b};
 }
 
+Size Size::operator/(const unsigned int &a) {
+  return {width/a, height/a};
+}
+
 LayoutContext deriveLayout(LayoutContext &parent) {
   LayoutContext clone = parent;
   clone.props.position = parent.props.position + parent.padding;

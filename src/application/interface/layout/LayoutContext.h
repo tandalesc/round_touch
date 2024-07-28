@@ -15,6 +15,7 @@ struct Size {
   Size operator+(const Size &a);
   Size operator+(const Position &a);
   Size operator-(const Position &a);
+  Size operator/(const unsigned int &a);
 };
 
 enum class LayoutType { Row, Column, None };
