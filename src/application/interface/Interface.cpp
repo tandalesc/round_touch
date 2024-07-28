@@ -4,6 +4,8 @@
 #include "src/application/interface/components/ComponentManager.h"
 #include "src/application/interface/components/types/Component.h"
 
+#include "src/events/types/TouchEvent.h"
+
 Interface::Interface(Application *app) {
   this->app = app;
   manager = new ComponentManager(app);
@@ -20,7 +22,7 @@ void Interface::loop() {
   }
 }
 
-void Interface::handleEvent(TouchEvent &event) {
+void Interface::handleEvent(InputEvent &event) {
   // manager needs to dispatch this event to the active components
   manager->handleEvent(event);
 }

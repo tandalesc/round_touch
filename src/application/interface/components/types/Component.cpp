@@ -1,8 +1,6 @@
 #include "src/application/interface/components/types/Component.h"
 
-void Component::attachApplication(Application *app) {
-  this->app = app;
-}
+void Component::attachApplication(Application *app) { this->app = app; }
 
 void Component::updateLayout(LayoutContext &layout) {
   // update position only.
@@ -13,7 +11,8 @@ void Component::updateLayout(LayoutContext &layout) {
 
 void Component::drawDebugBounds(Application *app) {
   app->device()->display().gfx->drawRect(
-      this->layout.position.l + this->layout.padding.l,
-      this->layout.position.t + this->layout.padding.t, this->layout.size.width,
-      this->layout.size.height, RED);
+      layout.position.l,
+      layout.position.t,
+      layout.preferredSize.width + layout.padding.l + layout.padding.r,
+      layout.preferredSize.height + layout.padding.t + layout.padding.b, RED);
 }

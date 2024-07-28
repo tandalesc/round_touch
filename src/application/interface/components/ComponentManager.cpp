@@ -9,12 +9,12 @@ void ComponentManager::createComponent(State state) {
     deleteComponent();
   }
   active = createComponentFromState(state);
+  active->attachApplication(app);
 }
 
 void ComponentManager::renderComponent() {
   if (active != nullptr) {
-    active->attachApplication(app);
-    active->calculateSize();
+    active->calculateSize(rootLayout);
     active->updateLayout(rootLayout);
     active->render(app);
   }
@@ -27,7 +27,7 @@ void ComponentManager::deleteComponent() {
   }
 }
 
-void ComponentManager::handleEvent(TouchEvent &event) {
+void ComponentManager::handleEvent(InputEvent &event) {
   if (active != nullptr) {
     active->handleEvent(event);
   }

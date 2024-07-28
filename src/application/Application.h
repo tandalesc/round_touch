@@ -6,19 +6,14 @@
 #include "src/application/interface/Interface.h"
 #include "src/application/workflow/Workflow.h"
 
-#include "src/events/EventQueue.h"
-#include "src/events/types/TouchEvent.h"
-#include "src/events/types/WorkflowEvent.h"
+#include "src/events/EventHub.h"
 
 class Application {
 private:
   Device *_device;
   Workflow _workflow;
   Interface _interface;
-  EventQueue<TouchEvent> _touchEventQueue;
-  EventQueue<WorkflowEvent> _workflowEventQueue;
-
-  void processTouchEvents();
+  EventHub _eventhub;
 
 public:
   Application(Device *device)
@@ -30,8 +25,7 @@ public:
   Device *device();
   Workflow &workflow();
   Interface &interface();
-  EventQueue<TouchEvent> &touchEvents();
-  EventQueue<WorkflowEvent> &workflowEvents();
+  EventHub &eventhub();
 };
 
 #endif // _APPLICATION_H_

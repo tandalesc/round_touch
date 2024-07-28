@@ -13,9 +13,9 @@ void ComponentWithChildren::attachApplication(Application *app) {
   Component::attachApplication(app);
 }
 
-void ComponentWithChildren::calculateSize() {
+void ComponentWithChildren::calculateSize(LayoutContext &layout) {
   for (auto &child : children) {
-    child->calculateSize();
+    child->calculateSize(layout);
   }
 }
 
@@ -25,7 +25,7 @@ void ComponentWithChildren::updateLayout(LayoutContext &layout) {
   }
 }
 
-void ComponentWithChildren::handleEvent(TouchEvent &event) {
+void ComponentWithChildren::handleEvent(InputEvent &event) {
   for (auto &child : children) {
     child->handleEvent(event);
   }

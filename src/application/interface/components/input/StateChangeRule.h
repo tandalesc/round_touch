@@ -4,30 +4,38 @@
 #include "src/events/types/TouchEvent.h"
 
 struct StateChangeRule {
-  TouchEvent::Type type = TouchEvent::Unknown;
-  TouchEvent::Direction direction = TouchEvent::None;
+  TouchType type = TouchType::UnknownType;
+  SwipeDirection direction = SwipeDirection::UnknownDirection;
   TouchRegion region = {};
   State newState;
 };
 
-static StateChangeRule onSwipe(TouchEvent::Direction direction, State state) {
-  return {.type = TouchEvent::Swipe, .direction = direction, .newState = state};
+static StateChangeRule onSwipe(SwipeDirection direction, State state) {
+  return {
+    .type = TouchType::SwipeType,
+    .direction = direction,
+    .newState = state
+  };
 }
 static StateChangeRule onSwipeUp(State state) {
-  return onSwipe(TouchEvent::Up, state);
+  return onSwipe(SwipeDirection::SwipeUp, state);
 }
 static StateChangeRule onSwipeDown(State state) {
-  return onSwipe(TouchEvent::Down, state);
+  return onSwipe(SwipeDirection::SwipeDown, state);
 }
 static StateChangeRule onSwipeLeft(State state) {
-  return onSwipe(TouchEvent::Left, state);
+  return onSwipe(SwipeDirection::SwipeLeft, state);
 }
 static StateChangeRule onSwipeRight(State state) {
-  return onSwipe(TouchEvent::Right, state);
+  return onSwipe(SwipeDirection::SwipeRight, state);
 }
 
 static StateChangeRule onTap(TouchRegion region, State state) {
-  return {.type = TouchEvent::Tap, .region = region, .newState = state};
+  return {
+    .type = TouchType::TapType,
+    .region = region,
+    .newState = state
+  };
 }
 static StateChangeRule onTapAnywhere(State state) { return onTap({}, state); }
 
