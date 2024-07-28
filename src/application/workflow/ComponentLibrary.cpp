@@ -124,9 +124,12 @@ RenderableComponent DetailsState() {
       E(TouchNavigation, onSwipeUp(READY)),
       E(FlexLayout, {.type = LayoutType::Column, .minor = Align::Center, .gap = 3},
         E(Text, {.size = 3}, "Details"),
-        E(FlexLayout, {.type = LayoutType::Column, .minor = Align::Center, .gap = 5},
-          E(Text, {.size = 2}, "2002 Mazda Miata"),
-          E(Text, {.size = 2}, "1.8L Stock")
+        E(FlexLayout, {.type = LayoutType::Row, .minor = Align::Center, .gap = 3},
+          E(Text, {.size = 2}, "2002"),
+          E(FlexLayout, {.type = LayoutType::Column, .minor = Align::Center, .gap = 5},
+            E(Text, {.size = 2}, "Mazda Miata"),
+            E(Text, {.size = 2}, "1.8L Stock")
+          )
         ),
         E(FlexLayout, {.type = LayoutType::Column, .minor = Align::Center, .gap = 5},
           E(Text, {.size = 2}, "- Special Edition"),
