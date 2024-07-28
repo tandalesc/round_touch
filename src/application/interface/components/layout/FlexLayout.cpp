@@ -2,11 +2,10 @@
 #include <math.h>
 
 void FlexLayout::calculateSize(LayoutContext &layout) {
-  LayoutContext derived = deriveLayout(layout);
+  ComponentWithChildren::calculateSize(layout);
   // calculate new size
   Size newSize;
   for (auto *child : this->children) {
-    child->calculateSize(derived);
     Size childSize = child->layout.props.size;
     Size childPreferredSize = child->layout.props.size;
     if (this->layout.type == LayoutType::Row) {

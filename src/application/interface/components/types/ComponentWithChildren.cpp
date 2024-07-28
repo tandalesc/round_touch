@@ -14,8 +14,9 @@ void ComponentWithChildren::attachApplication(Application *app) {
 }
 
 void ComponentWithChildren::calculateSize(LayoutContext &layout) {
+  LayoutContext derived = deriveLayout(layout);
   for (auto &child : children) {
-    child->calculateSize(layout);
+    child->calculateSize(derived);
   }
 }
 
