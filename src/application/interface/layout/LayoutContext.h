@@ -15,8 +15,10 @@ struct Size {
   Size operator+(const Size &a);
   Size operator+(const Position &a);
   Size operator-(const Position &a);
+  Size operator*(const unsigned int &a);
   Size operator/(const unsigned int &a);
 };
+Size operator*(const int &a, const Size &b);
 
 enum class LayoutType { Row, Column, None };
 enum class Align { Start, End, Center };
@@ -32,7 +34,8 @@ struct LayoutContext {
   LayoutType type = LayoutType::None;
   Align major = Align::Start;
   Align minor = Align::Start;
-  int gap = 0;
+  unsigned int gap = 0;
+  unsigned int grow = 0;
   Position padding = {};
   ContainerProps props = {};
 };

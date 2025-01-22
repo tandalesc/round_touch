@@ -2,29 +2,40 @@
 #include <math.h>
 
 void FlexLayout::calculateSize(LayoutContext &layout) {
-  ComponentWithChildren::calculateSize(layout);
+  LayoutContext derived = deriveLayout(layout);
   // calculate new size by visiting all children
-  Size newSize;
+  Size sumSize;
+  Size largestSize;
+  bool overflow = false;
   for (auto *child : this->children) {
+    child->calculateSize(derived);
     Size childSize = child->layout.props.size;
     Size childPreferredSize = child->layout.props.preferredSize;
-    if (this->layout.type == LayoutType::Row) {
-      newSize.width += childSize.width + this->layout.gap;
-      // use size instead of preferredSize for row
-      // TODO find a better solution
-      newSize.height = max(newSize.height, childSize.height);
-    } else if (this->layout.type == LayoutType::Column) {
-      newSize.width = max(newSize.width, childPreferredSize.width);
-      newSize.height += childSize.height + this->layout.gap;
+    sumSize.width += childSize.width + this->layout.gap;
+    sumSize.height += childSize.height + this->layout.gap;
+    largestSize.width = max(maxSize.width, childSize.width);
+    largestSize.height = max(maxSize.height, childSize.height);
+  }
+  Size newSize;
+  if(this->layout.type == LayoutType::Row) {
+    if(this->layout.grow == 0) {
+      newSize.width = sumSize.width;
     } else {
-      newSize.width = max(newSize.width, childPreferredSize.width);
-      newSize.height = max(newSize.height, childPreferredSize.height);
+      newSize.width = derived.props.preferredSize.width;
     }
+    newSize.height = largestSize.height;
+  } else if (this->layout.type == LayoutType::Column) {
+    if(this->layout.grow == 0) {
+      newSize.height = sumSize.height;
+    } else {
+      newSize.height = derived.props.preferredSize.height;
+    }
+    newSize.width = largestSize.width;
   }
   // update size and preferred size
   this->layout.props.size = newSize;
-  this->layout.props.preferredSize =
-      layout.props.preferredSize - layout.padding;
+  this->layout.props.preferredSize = derived.props.preferredSize;
+
   if (this->layout.type == LayoutType::None) {
     this->layout.props.preferredSize = newSize;
   }
@@ -64,6 +75,7 @@ void FlexLayout::updateLayout(LayoutContext &layout) {
   }
   childCtx.props.position = initialCtxProps.position;
   ContainerProps &ctxProps = childCtx.props;
+  bool overflow = false;
   for (int i = 0; i < this->children.size(); i++) {
     auto *child = this->children[i];
     ContainerProps &childProps = child->layout.props;
@@ -105,6 +117,10 @@ void FlexLayout::updateLayout(LayoutContext &layout) {
         ctxProps.position.l =
             initialCtxProps.position.l - childProps.size.width;
       }
+    }
+    if (ctxProps.position.l > ctxProps.preferredSize.width ||
+        ctxProps.position.t > ctxProps.preferredSize.height) {
+      overflow = true;
     }
     child->updateLayout(childCtx);
   }

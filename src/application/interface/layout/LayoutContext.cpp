@@ -16,8 +16,16 @@ Size Size::operator-(const Position &a) {
   return {width - a.l - a.r, height - a.t - a.b};
 }
 
+Size Size::operator*(const unsigned int &a) {
+  return {width*a, height*a};
+}
+
 Size Size::operator/(const unsigned int &a) {
   return {width/a, height/a};
+}
+
+Size operator*(const int &a, const Size &b) {
+  return b*a;
 }
 
 LayoutContext deriveLayout(LayoutContext &parent) {
