@@ -9,11 +9,7 @@ void LayoutManager::detatch() {
 }
 
 void updateSizes() {
-    LayoutContext *layout = &root;
-    while(layout != nullptr) {
-        LayoutContext derived = deriveLayout(*layout);
-        
-    }
+    //LayoutContext *layout = &root;
 }
 
 void updatePositions() {
@@ -21,6 +17,6 @@ void updatePositions() {
 }
 
 void LayoutManager::reflow() {
-    updateSizes()
+    updateSizes();
     updatePositions();
 }

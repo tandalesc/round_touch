@@ -13,8 +13,8 @@ void FlexLayout::calculateSize(LayoutContext &layout) {
     Size childPreferredSize = child->layout.props.preferredSize;
     sumSize.width += childSize.width + this->layout.gap;
     sumSize.height += childSize.height + this->layout.gap;
-    largestSize.width = max(maxSize.width, childSize.width);
-    largestSize.height = max(maxSize.height, childSize.height);
+    largestSize.width = max(largestSize.width, childSize.width);
+    largestSize.height = max(largestSize.height, childSize.height);
   }
   Size newSize;
   if(this->layout.type == LayoutType::Row) {
