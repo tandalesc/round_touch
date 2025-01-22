@@ -25,7 +25,7 @@ Size Size::operator/(const unsigned int &a) {
 }
 
 Size operator*(const int &a, const Size &b) {
-  return b*a;
+  return a*b;
 }
 
 LayoutContext deriveLayout(LayoutContext &parent) {
