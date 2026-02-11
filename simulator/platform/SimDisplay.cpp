@@ -4,8 +4,11 @@
 // --- Globals ---
 static SDL_Window *g_window = nullptr;
 static SDL_Renderer *g_renderer = nullptr;
+static SDL_Texture *g_framebuffer = nullptr;
+static SDL_Texture *g_maskTexture = nullptr;
 static int g_logicalW = 240;
 static int g_logicalH = 240;
+static bool g_dirty = false;
 
 // --- Standard Adafruit GFX 5x7 font (6x8 with spacing) ---
 // Each character is 5 bytes, each byte is a column (LSB = top pixel)
@@ -108,6 +111,34 @@ static const uint8_t font5x7[] = {
     0x08, 0x08, 0x2A, 0x1C, 0x08, // ~
 };
 
+static void createMaskTexture() {
+  // Create a texture with the round mask: transparent inside, black outside
+  g_maskTexture = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_RGBA8888,
+                                    SDL_TEXTUREACCESS_STATIC, g_logicalW,
+                                    g_logicalH);
+  SDL_SetTextureBlendMode(g_maskTexture, SDL_BLENDMODE_BLEND);
+
+  uint32_t *pixels = new uint32_t[g_logicalW * g_logicalH];
+  int cx = g_logicalW / 2;
+  int cy = g_logicalH / 2;
+  int r2 = cx * cx;
+
+  for (int y = 0; y < g_logicalH; y++) {
+    for (int x = 0; x < g_logicalW; x++) {
+      int dx = x - cx;
+      int dy = y - cy;
+      if (dx * dx + dy * dy > r2) {
+        pixels[y * g_logicalW + x] = 0x000000FF; // black, fully opaque (RGBA8888)
+      } else {
+        pixels[y * g_logicalW + x] = 0x00000000; // fully transparent
+      }
+    }
+  }
+
+  SDL_UpdateTexture(g_maskTexture, nullptr, pixels, g_logicalW * sizeof(uint32_t));
+  delete[] pixels;
+}
+
 void SimDisplay::init(int windowWidth, int windowHeight, int logicalWidth,
                       int logicalHeight) {
   g_logicalW = logicalWidth;
@@ -121,20 +152,34 @@ void SimDisplay::init(int windowWidth, int windowHeight, int logicalWidth,
     return;
   }
 
-  g_renderer =
-      SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
+  g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
   if (!g_renderer) {
     fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
     return;
   }
 
   SDL_RenderSetLogicalSize(g_renderer, logicalWidth, logicalHeight);
+
+  // Create framebuffer texture — app renders into this
+  g_framebuffer = SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_RGBA8888,
+                                    SDL_TEXTUREACCESS_TARGET, logicalWidth,
+                                    logicalHeight);
+
+  // Point renderer at framebuffer by default so all gfx calls draw there
+  SDL_SetRenderTarget(g_renderer, g_framebuffer);
   SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_BLEND);
+
+  // Pre-build the round mask texture (done once)
+  createMaskTexture();
 }
 
 void SimDisplay::shutdown() {
+  if (g_maskTexture) SDL_DestroyTexture(g_maskTexture);
+  if (g_framebuffer) SDL_DestroyTexture(g_framebuffer);
   if (g_renderer) SDL_DestroyRenderer(g_renderer);
   if (g_window) SDL_DestroyWindow(g_window);
+  g_maskTexture = nullptr;
+  g_framebuffer = nullptr;
   g_renderer = nullptr;
   g_window = nullptr;
 }
@@ -146,7 +191,6 @@ SDL_Color SimDisplay::rgb565ToSDL(uint16_t color) {
   uint8_t r = ((color >> 11) & 0x1F) << 3;
   uint8_t g = ((color >> 5) & 0x3F) << 2;
   uint8_t b = (color & 0x1F) << 3;
-  // Fill in lower bits for full range
   r |= r >> 5;
   g |= g >> 6;
   b |= b >> 5;
@@ -177,23 +221,18 @@ void SimDisplay::drawChar(SDL_Renderer *r, int x, int y, char c,
   }
 }
 
-void SimDisplay::drawRoundMask(SDL_Renderer *r, int cx, int cy, int radius) {
-  // Draw black pixels outside the circular display area
-  SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
-  int r2 = radius * radius;
-  for (int y = 0; y < g_logicalH; y++) {
-    for (int x = 0; x < g_logicalW; x++) {
-      int dx = x - cx;
-      int dy = y - cy;
-      if (dx * dx + dy * dy > r2) {
-        SDL_RenderDrawPoint(r, x, y);
-      }
-    }
-  }
-}
+void SimDisplay::markDirty() { g_dirty = true; }
 
 void SimDisplay::present() {
-  // Apply round mask before presenting
-  drawRoundMask(g_renderer, g_logicalW / 2, g_logicalH / 2, g_logicalW / 2);
+  // Switch to screen, blit framebuffer, overlay round mask, present
+  SDL_SetRenderTarget(g_renderer, nullptr);
+  SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 255);
+  SDL_RenderClear(g_renderer);
+  SDL_RenderCopy(g_renderer, g_framebuffer, nullptr, nullptr);
+  SDL_RenderCopy(g_renderer, g_maskTexture, nullptr, nullptr);
   SDL_RenderPresent(g_renderer);
+
+  // Switch back to framebuffer for next frame's rendering
+  SDL_SetRenderTarget(g_renderer, g_framebuffer);
+  g_dirty = false;
 }

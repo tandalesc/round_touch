@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <string>
 
+#include "simulator/platform/SimTouch.h"
+
 // --- Types ---
 typedef uint8_t byte;
 
@@ -34,6 +36,7 @@ inline void delay(unsigned long ms) {
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
       if (e.type == SDL_QUIT) exit(0);
+      SimTouch::processEvent(e);
     }
     SDL_Delay(1);
   }
