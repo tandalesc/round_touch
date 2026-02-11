@@ -16,8 +16,10 @@ public:
   static SDL_Color rgb565ToSDL(uint16_t color);
   static void drawChar(SDL_Renderer *r, int x, int y, char c, uint16_t color,
                        uint8_t size);
-  static void drawRoundMask(SDL_Renderer *r, int cx, int cy, int radius);
   static void present();
+
+  // Call when a frame has been rendered to the framebuffer
+  static void markDirty();
 };
 
 #endif // _SIM_DISPLAY_H_
