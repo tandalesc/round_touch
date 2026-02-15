@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <vector>
 
+#include "application/Application.h"
 #include "application/interface/components/input/StateChangeRule.h"
 #include "application/interface/components/types/Component.h"
 #include "events/types/TouchEvent.h"

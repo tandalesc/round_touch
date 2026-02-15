@@ -1,20 +1,36 @@
 cmake_minimum_required(VERSION 3.16)
-project(round_touch_sim CXX)
+project(round_touch_sim C CXX)
 
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find SDL2
 find_package(SDL2 REQUIRED)
 
+# SDL2 parent include (LVGL needs <SDL2/SDL.h> which requires the parent dir)
+get_filename_component(SDL2_INCLUDE_PARENT "${SDL2_INCLUDE_DIRS}" DIRECTORY)
+
+# LVGL configuration
+set(LV_CONF_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../lib/lv_conf.h CACHE STRING "" FORCE)
+set(LV_CONF_BUILD_DISABLE_EXAMPLES ON)
+set(LV_CONF_BUILD_DISABLE_DEMOS ON)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../lib/lvgl ${CMAKE_BINARY_DIR}/lvgl)
+
+# LVGL needs SDL2 headers for its built-in SDL driver
+target_include_directories(lvgl PUBLIC ${SDL2_INCLUDE_PARENT})
+
 # Include paths - ORDER MATTERS
 # 1. Shims directory (overrides Arduino library headers like <Arduino.h>)
-# 2. src/ directory (include root for application code)
-# 3. SDL2 headers
+# 2. Simulator directory (for platform/ includes)
+# 3. src/ directory (include root for application code)
+# 4. LVGL conf (next to lvgl/ folder)
+# 5. SDL2 headers
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/shims
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../src
+    ${CMAKE_CURRENT_SOURCE_DIR}/../lib
     ${SDL2_INCLUDE_DIRS}
 )
 
@@ -40,4 +56,4 @@ set(APP_SOURCES
 )
 
 add_executable(round_touch_sim ${SIM_SOURCES} ${APP_SOURCES})
-target_link_libraries(round_touch_sim ${SDL2_LIBRARIES})
+target_link_libraries(round_touch_sim lvgl ${SDL2_LIBRARIES})

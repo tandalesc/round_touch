@@ -1,8 +1,6 @@
 #ifndef _CORE_FLEX_LAYOUT_H_
 #define _CORE_FLEX_LAYOUT_H_
 
-#define DRAW_DEBUG false
-
 #include "application/interface/components/types/ComponentWithChildren.h"
 
 class FlexLayout : public ComponentWithChildren {
@@ -16,15 +14,7 @@ public:
     this->layout = layout;
   };
 
-  virtual void calculateSize(LayoutContext &layout) override;
-  virtual void updateLayout(LayoutContext &layout) override;
-
-#if DRAW_DEBUG
-  void render(Application *app) override {
-    ComponentWithChildren::render(app);
-    drawDebugBounds(app);
-  }
-#endif
+  void createWidgets(lv_obj_t *parent) override;
 };
 
 #endif // _CORE_FLEX_LAYOUT_H_

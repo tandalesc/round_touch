@@ -1,3 +1,5 @@
+#include "lvgl.h"
+
 #include "application/Application.h"
 
 #include "application/interface/Interface.h"
@@ -17,9 +19,10 @@ Interface::~Interface() { delete manager; }
 void Interface::loop() {
   if (refresh) {
     manager->createComponent(app->workflow().getState());
-    manager->renderComponent();
     refresh = false;
   }
+  // drive LVGL's internal timers (animation, rendering, etc.)
+  lv_timer_handler();
 }
 
 void Interface::handleEvent(InputEvent &event) {
