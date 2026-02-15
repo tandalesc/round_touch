@@ -6,6 +6,8 @@
 #include "application/interface/components/input/StateChangeRule.h"
 #include "application/interface/components/core/FillScreen.h"
 #include "application/interface/components/core/Text.h"
+#include "application/interface/components/demo/Counter.h"
+#include "application/interface/components/ha/HAToggle.h"
 
 // Color constants (hex RGB)
 #define CLR_BLACK   0x000000
@@ -29,6 +31,8 @@ RenderableComponent createComponentFromState(State state) {
     return Info3State();
   } else if (state == DETAILS) {
     return DetailsState();
+  } else if (state == LIGHTS) {
+    return LightsState();
   }
   return E(Component);
 }
@@ -90,8 +94,13 @@ RenderableComponent Info1State() {
         onSwipeLeft(INFO2),
         onSwipeRight(READY)
       }),
-      E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
-        E(Text, "Gauges")
+      E(FlexLayout, {.type = LayoutType::Column, .props = {.gap = 10}},
+        E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
+          E(Text, {.size = 3}, "Gauges")
+        ),
+        E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
+          E(Counter)
+        )
       )
     )
   );
@@ -117,6 +126,7 @@ RenderableComponent Info3State() {
     E(FillScreen, {CLR_BLACK},
       E(TouchNavigation, {
         onSwipeDown(ECOMODE),
+        onSwipeLeft(LIGHTS),
         onSwipeRight(INFO2)
       }),
       E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
@@ -148,6 +158,25 @@ RenderableComponent DetailsState() {
             E(Text, {.size = 2}, "- 6 Speed"),
             E(Text, {.size = 2}, "- Torsen LSD")
           )
+        )
+      )
+    )
+  );
+}
+
+RenderableComponent LightsState() {
+  return (
+    E(FillScreen, {CLR_BLACK},
+      E(TouchNavigation, {
+        onSwipeDown(ECOMODE),
+        onSwipeRight(INFO3)
+      }),
+      E(FlexLayout, {.type = LayoutType::Column, .props = {.gap = 10}},
+        E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
+          E(Text, {.size = 3}, "Lights")
+        ),
+        E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
+          E(HAToggle, "light.living_room_lamp")
         )
       )
     )

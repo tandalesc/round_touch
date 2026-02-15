@@ -6,12 +6,14 @@
 #include "device/IDisplay.h"
 #include "device/ITouch.h"
 #include "device/IStorage.h"
+#include "device/INetwork.h"
 
 class Device {
 private:
   IDisplay *_display = nullptr;
   ITouch *_touch = nullptr;
   IStorage *_storage = nullptr;
+  INetwork *_network = nullptr;
 
 public:
   Device();
@@ -22,6 +24,7 @@ public:
   IDisplay &display();
   ITouch &touchscreen();
   IStorage &sdcard();
+  INetwork &network();
 };
 
 #endif // _DEVICE_H_

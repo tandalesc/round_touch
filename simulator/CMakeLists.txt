@@ -16,8 +16,18 @@ if(DEFINED SCREEN_HEIGHT)
     add_compile_definitions(SCREEN_HEIGHT=${SCREEN_HEIGHT})
 endif()
 
-# Find SDL2
+# Find SDL2 and CURL
 find_package(SDL2 REQUIRED)
+find_package(CURL REQUIRED)
+
+# ArduinoJson (header-only, used by HomeAssistant service)
+include(FetchContent)
+FetchContent_Declare(
+    ArduinoJson
+    GIT_REPOSITORY https://github.com/bblanchon/ArduinoJson.git
+    GIT_TAG        v7.3.0
+)
+FetchContent_MakeAvailable(ArduinoJson)
 
 # SDL2 parent include (LVGL needs <SDL2/SDL.h> which requires the parent dir)
 get_filename_component(SDL2_INCLUDE_PARENT "${SDL2_INCLUDE_DIRS}" DIRECTORY)
@@ -49,6 +59,7 @@ include_directories(
 set(SIM_SOURCES
     main.cpp
     platform/SimTouch.cpp
+    platform/CurlNetwork.cpp
 )
 
 # Shared application sources from src/ (compile against shims unchanged)
@@ -62,8 +73,9 @@ set(APP_SOURCES
     ../src/application/interface/components/layout/FlexLayout.cpp
     ../src/application/workflow/Workflow.cpp
     ../src/application/workflow/ComponentLibrary.cpp
+    ../src/application/services/HomeAssistant.cpp
     ../src/device/Device.cpp
 )
 
 add_executable(round_touch_sim ${SIM_SOURCES} ${APP_SOURCES})
-target_link_libraries(round_touch_sim lvgl ${SDL2_LIBRARIES})
+target_link_libraries(round_touch_sim lvgl ${SDL2_LIBRARIES} CURL::libcurl ArduinoJson)

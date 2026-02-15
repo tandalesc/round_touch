@@ -78,7 +78,7 @@ struct SerialShim {
   void print(float v) { printf("%f", v); }
   void print(double v) { printf("%f", v); }
 
-  void println() { printf("\n"); }
+  void println() { ::printf("\n"); }
   void println(const char *s) { printf("%s\n", s); }
   void println(char c) { printf("%c\n", c); }
   void println(int v) { printf("%d\n", v); }
@@ -87,6 +87,10 @@ struct SerialShim {
   void println(unsigned long v) { printf("%lu\n", v); }
   void println(float v) { printf("%f\n", v); }
   void println(double v) { printf("%f\n", v); }
+
+  // Variadic printf (used by ESP32 Arduino core)
+  template <typename... Args>
+  void printf(const char *fmt, Args... args) { ::printf(fmt, args...); }
 };
 
 // Forward declare so String can use it
@@ -111,11 +115,37 @@ public:
   String operator+(const String &other) const { return String(_s + other._s); }
   String operator+(const char *other) const { return String(_s + other); }
 
+  String &operator+=(const char *other) { _s += other; return *this; }
+  String &operator+=(const String &other) { _s += other._s; return *this; }
+  String &operator+=(char c) { _s += c; return *this; }
+
   const char *c_str() const { return _s.c_str(); }
   int length() const { return (int)_s.length(); }
 
+  // Arduino String methods used by application code
+  int indexOf(char c) const { auto p = _s.find(c); return p == std::string::npos ? -1 : (int)p; }
+  int indexOf(char c, int from) const { auto p = _s.find(c, from); return p == std::string::npos ? -1 : (int)p; }
+  String substring(int from) const { return String(_s.substr(from)); }
+  String substring(int from, int to) const { return String(_s.substr(from, to - from)); }
+
+  // Stream-like methods required by ArduinoJson
+  size_t write(uint8_t c) { _s += (char)c; return 1; }
+  size_t write(const uint8_t *buf, size_t len) { _s.append((const char *)buf, len); return len; }
+  int read() {
+    if (_readPos >= (int)_s.size()) return -1;
+    return (unsigned char)_s[_readPos++];
+  }
+  int available() const { return (int)_s.size() - _readPos; }
+  int peek() const {
+    if (_readPos >= (int)_s.size()) return -1;
+    return (unsigned char)_s[_readPos];
+  }
+
   // Allow Serial.print(String)
   operator const char *() const { return _s.c_str(); }
+
+private:
+  int _readPos = 0;
 };
 
 // --- ESP32 define ---
