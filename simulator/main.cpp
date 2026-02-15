@@ -10,20 +10,15 @@
 #include "application/Application.h"
 
 int main(int, char *[]) {
-  // Initialize LVGL
-  lv_init();
-
-  // Create LVGL SDL display (handles SDL_Init internally)
-  lv_display_t *display = lv_sdl_window_create(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-  // Create LVGL SDL mouse input device
-  lv_indev_t *mouse = lv_sdl_mouse_create();
-
-  // Initialize application
+  // Initialize application (Device::init handles lv_init + LVGL display)
   Device device;
   Application app(&device);
 
   device.init();
+
+  // Create LVGL SDL mouse input device (after lv_init in device.init)
+  lv_sdl_mouse_create();
+
   app.init();
 
   printf("Simulator running. Click to tap, click+drag to swipe.\n");

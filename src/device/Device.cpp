@@ -1,3 +1,4 @@
+#include "lvgl.h"
 #include "device/Device.h"
 
 #ifdef BOARD_MAKERFABS_ROUND_128
@@ -49,6 +50,14 @@ void Device::init() {
   _display->init();
   _storage->init();
   _touch->init();
+
+  // Initialize LVGL and create the display driver
+  lv_init();
+#ifndef BOARD_SIMULATOR
+  // Provide Arduino millis() as LVGL's tick source (SDL driver handles its own)
+  lv_tick_set_cb((lv_tick_get_cb_t)millis);
+#endif
+  _display->initLVGL();
 
   if (_storage->hasError()) {
     Serial.println("SD Card initialization error");

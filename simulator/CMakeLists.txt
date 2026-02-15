@@ -5,6 +5,9 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Board define - must be set before LVGL so lv_conf.h can use it
+add_compile_definitions(BOARD_SIMULATOR)
+
 # Find SDL2
 find_package(SDL2 REQUIRED)
 

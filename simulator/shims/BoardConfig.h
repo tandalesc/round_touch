@@ -33,7 +33,6 @@
 
 #define SPLASH_SCREEN_JPEG_PATH "/logo_240240.jpg"
 
-// Use simulator board define so Device.cpp constructs sim drivers
-#define BOARD_SIMULATOR
+// BOARD_SIMULATOR is defined via CMake compile definition (add_compile_definitions)
 
 #endif // _BOARD_CONFIG_H_

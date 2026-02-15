@@ -78,16 +78,20 @@
  * DEVICES
  *==================*/
 
-/*Use SDL to open window on PC and handle mouse and keyboard*/
-#define LV_USE_SDL              1
-#if LV_USE_SDL
-    #define LV_SDL_INCLUDE_PATH     <SDL2/SDL.h>
-    #define LV_SDL_RENDER_MODE      LV_DISPLAY_RENDER_MODE_DIRECT
-    #define LV_SDL_BUF_COUNT        1
-    #define LV_SDL_ACCELERATED      1
-    #define LV_SDL_FULLSCREEN       0
-    #define LV_SDL_DIRECT_EXIT      1
-    #define LV_SDL_MOUSEWHEEL_MODE  LV_SDL_MOUSEWHEEL_MODE_ENCODER
+/*Use SDL to open window on PC (simulator only)*/
+#ifdef BOARD_SIMULATOR
+    #define LV_USE_SDL              1
+    #if LV_USE_SDL
+        #define LV_SDL_INCLUDE_PATH     <SDL2/SDL.h>
+        #define LV_SDL_RENDER_MODE      LV_DISPLAY_RENDER_MODE_DIRECT
+        #define LV_SDL_BUF_COUNT        1
+        #define LV_SDL_ACCELERATED      1
+        #define LV_SDL_FULLSCREEN       0
+        #define LV_SDL_DIRECT_EXIT      1
+        #define LV_SDL_MOUSEWHEEL_MODE  LV_SDL_MOUSEWHEEL_MODE_ENCODER
+    #endif
+#else
+    #define LV_USE_SDL              0
 #endif
 
 /*==================

@@ -8,12 +8,16 @@
 #include "events/types/TouchEvent.h"
 #include "platform/SimTouch.h"
 
-// Simulator display - LVGL handles rendering via its own SDL driver
+// Simulator display - LVGL renders via its built-in SDL driver
 class SimDisplayDriver : public IDisplay {
 public:
   void init() override {}
   int width() override { return SCREEN_WIDTH; }
   int height() override { return SCREEN_HEIGHT; }
+
+  lv_display_t *initLVGL() override {
+    return lv_sdl_window_create(SCREEN_WIDTH, SCREEN_HEIGHT);
+  }
 };
 
 // Simulator touch wraps SimTouch

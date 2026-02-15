@@ -10,6 +10,13 @@ class RGBPanelDisplay : public IDisplay {
 private:
   esp_lcd_panel_handle_t _panel = nullptr;
 
+  static void flushCb(lv_display_t *disp, const lv_area_t *area, uint8_t *px) {
+    auto *self = (RGBPanelDisplay *)lv_display_get_user_data(disp);
+    esp_lcd_panel_draw_bitmap(self->_panel, area->x1, area->y1,
+                              area->x2 + 1, area->y2 + 1, px);
+    lv_display_flush_ready(disp);
+  }
+
 public:
   RGBPanelDisplay() {}
   ~RGBPanelDisplay() {
@@ -58,6 +65,7 @@ public:
     panel_config.timings.flags.pclk_active_neg = 1;
 
     panel_config.flags.fb_in_psram = 1;
+    panel_config.num_fbs = 2;
     panel_config.bounce_buffer_size_px = 10 * SCREEN_WIDTH;
 
     ESP_ERROR_CHECK(esp_lcd_new_rgb_panel(&panel_config, &_panel));
@@ -65,7 +73,23 @@ public:
     ESP_ERROR_CHECK(esp_lcd_panel_init(_panel));
   }
 
-  esp_lcd_panel_handle_t panel() { return _panel; }
+  lv_display_t *initLVGL() override {
+    lv_display_t *disp = lv_display_create(SCREEN_WIDTH, SCREEN_HEIGHT);
+    lv_display_set_user_data(disp, this);
+    lv_display_set_flush_cb(disp, flushCb);
+    lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB565);
+
+    // Use the RGB panel's PSRAM framebuffers directly (zero-copy)
+    void *fb1 = nullptr;
+    void *fb2 = nullptr;
+    esp_lcd_rgb_panel_get_frame_buffer(_panel, 2, &fb1, &fb2);
+    lv_display_set_buffers(disp, fb1, fb2,
+                           SCREEN_WIDTH * SCREEN_HEIGHT * 2,
+                           LV_DISPLAY_RENDER_MODE_DIRECT);
+
+    return disp;
+  }
+
   int width() override { return SCREEN_WIDTH; }
   int height() override { return SCREEN_HEIGHT; }
 };
