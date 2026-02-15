@@ -1,11 +1,14 @@
 #include "device/Device.h"
 
-#include "lib/jpeg/JpegFunctions.h"
-
 #ifdef BOARD_MAKERFABS_ROUND_128
 #include "device/hw/drivers/gc9a01/GC9A01Display.h"
 #include "device/hw/drivers/cst816s/CST816STouch.h"
 #include "device/hw/drivers/sdcard/SPISDCard.h"
+#elif defined(BOARD_WAVESHARE_S3_LCD_7)
+#include "device/hw/drivers/ch422g/CH422G.h"
+#include "device/hw/drivers/rgb_panel/RGBPanelDisplay.h"
+#include "device/hw/drivers/gt911/GT911Touch.h"
+#include "device/hw/drivers/sdcard/NoStorage.h"
 #elif defined(BOARD_SIMULATOR)
 #include "SimDrivers.h"
 #endif
@@ -15,6 +18,10 @@ Device::Device() {
   _display = new GC9A01Display();
   _touch = new CST816STouch();
   _storage = new SPISDCard();
+#elif defined(BOARD_WAVESHARE_S3_LCD_7)
+  _display = new RGBPanelDisplay();
+  _touch = new GT911Touch();
+  _storage = new NoStorage();
 #elif defined(BOARD_SIMULATOR)
   _display = new SimDisplayDriver();
   _touch = new SimTouchDriver();
@@ -29,27 +36,23 @@ Device::~Device() {
 }
 
 void Device::init() {
+#ifdef BOARD_WAVESHARE_S3_LCD_7
+  // CH422G must be initialized first - it controls reset pins for LCD and touch
+  CH422G::init();
+  CH422G::setAllOutput();
+  CH422G::setPin(CH422G_EXIO_LCD_RST, true);
+  CH422G::setPin(CH422G_EXIO_TP_RST, true);
+  CH422G::setPin(CH422G_EXIO_LCD_BL, true);
+  delay(100);
+#endif
+
   _display->init();
   _storage->init();
   _touch->init();
-  delay(1000);
+
   if (_storage->hasError()) {
     Serial.println("SD Card initialization error");
-    return;
   }
-  showSplashScreen();
-}
-
-void Device::showMessage(const char *msg) {
-  auto gfx = _display->gfx();
-  gfx->setTextSize(4);
-  gfx->setCursor(10, 80);
-  gfx->println(F(msg));
-}
-
-void Device::showSplashScreen() {
-  drawJpegFullscreen(*_display, *_storage, SPLASH_SCREEN_JPEG_PATH);
-  delay(2000);
 }
 
 IDisplay &Device::display() { return *_display; }

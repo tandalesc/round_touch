@@ -25,7 +25,6 @@ public:
     panel->begin();
   }
 
-  Arduino_GFX *gfx() override { return panel; }
   int width() override { return SCREEN_WIDTH; }
   int height() override { return SCREEN_HEIGHT; }
 };

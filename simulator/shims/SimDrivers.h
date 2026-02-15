@@ -8,20 +8,10 @@
 #include "events/types/TouchEvent.h"
 #include "platform/SimTouch.h"
 
-// Simulator display wraps Arduino_GFX which is already shimmed by SDL2
+// Simulator display - LVGL handles rendering via its own SDL driver
 class SimDisplayDriver : public IDisplay {
-private:
-  Arduino_ESP32SPI *bus = nullptr;
-  Arduino_GC9A01 *panel = nullptr;
-
 public:
-  void init() override {
-    bus = new Arduino_ESP32SPI(0, 0, 0, 0, 0);
-    panel = new Arduino_GC9A01(bus, 0, 0, true);
-    panel->begin();
-  }
-
-  Arduino_GFX *gfx() override { return panel; }
+  void init() override {}
   int width() override { return SCREEN_WIDTH; }
   int height() override { return SCREEN_HEIGHT; }
 };

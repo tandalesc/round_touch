@@ -13,14 +13,11 @@ private:
   ITouch *_touch = nullptr;
   IStorage *_storage = nullptr;
 
-  void showSplashScreen();
-
 public:
   Device();
   ~Device();
 
   void init();
-  void showMessage(const char *msg);
 
   IDisplay &display();
   ITouch &touchscreen();

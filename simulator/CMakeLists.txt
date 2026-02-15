@@ -37,7 +37,6 @@ include_directories(
 # Simulator-specific sources
 set(SIM_SOURCES
     main.cpp
-    platform/SimDisplay.cpp
     platform/SimTouch.cpp
 )
 
