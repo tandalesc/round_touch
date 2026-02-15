@@ -14,5 +14,6 @@ RenderableComponent Info1State();
 RenderableComponent Info2State();
 RenderableComponent Info3State();
 RenderableComponent DetailsState();
+RenderableComponent LightsState();
 
 #endif // _COMPONENT_LIBRARY_H_

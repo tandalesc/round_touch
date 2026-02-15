@@ -5,7 +5,7 @@
 
 class Application;
 
-enum State { NOT_STARTED, ERROR, READY, INFO1, INFO2, INFO3, ECOMODE, DETAILS };
+enum State { NOT_STARTED, ERROR, READY, INFO1, INFO2, INFO3, ECOMODE, DETAILS, LIGHTS };
 
 class Workflow {
 private:

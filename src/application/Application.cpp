@@ -1,11 +1,13 @@
 #include <Arduino.h>
 
 #include "application/Application.h"
+#include "config/NetworkConfig.h"
 
 Device *Application::device() { return _device; }
 Workflow &Application::workflow() { return _workflow; }
 Interface &Application::interface() { return _interface; }
 EventHub &Application::eventhub() { return _eventhub; }
+HomeAssistant *Application::ha() { return _ha; }
 
 void Application::init() {
   // subscribe interface to workflow events
@@ -13,6 +15,13 @@ void Application::init() {
   // as soon as it happens without needing to periodically
   // refresh.
   eventhub().workflowEvents().subscribe(&interface());
+  // initialize Home Assistant service if network is available
+  if (device()->network().isConnected()) {
+    _ha = new HomeAssistant(&device()->network(), HA_BASE_URL, HA_ACCESS_TOKEN);
+    Serial.println("Home Assistant service initialized.");
+  } else {
+    Serial.println("Network not connected — HA service unavailable.");
+  }
   // kick start application by navigating to first state
   workflow().navigate(READY);
   Serial.println("Initialized Application.");
@@ -21,6 +30,7 @@ void Application::init() {
 Application::~Application() {
   // unsubscribe interface from events at the end of lifecycle
   eventhub().workflowEvents().unsubscribe(&interface());
+  delete _ha;
 }
 
 void Application::loop() {

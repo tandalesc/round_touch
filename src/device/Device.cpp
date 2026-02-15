@@ -5,14 +5,17 @@
 #include "device/hw/drivers/gc9a01/GC9A01Display.h"
 #include "device/hw/drivers/cst816s/CST816STouch.h"
 #include "device/hw/drivers/sdcard/SPISDCard.h"
+#include "device/hw/drivers/network/ArduinoNetwork.h"
 #elif defined(BOARD_WAVESHARE_S3_LCD_7)
 #include <Wire.h>
 #include "device/hw/drivers/ch422g/CH422G.h"
 #include "device/hw/drivers/rgb_panel/RGBPanelDisplay.h"
 #include "device/hw/drivers/gt911/GT911Touch.h"
 #include "device/hw/drivers/sdcard/NoStorage.h"
+#include "device/hw/drivers/network/ArduinoNetwork.h"
 #elif defined(BOARD_SIMULATOR)
 #include "SimDrivers.h"
+#include "platform/CurlNetwork.h"
 #endif
 
 Device::Device() {
@@ -20,18 +23,22 @@ Device::Device() {
   _display = new GC9A01Display();
   _touch = new CST816STouch();
   _storage = new SPISDCard();
+  _network = new ArduinoNetwork();
 #elif defined(BOARD_WAVESHARE_S3_LCD_7)
   _display = new RGBPanelDisplay();
   _touch = new GT911Touch();
   _storage = new NoStorage();
+  _network = new ArduinoNetwork();
 #elif defined(BOARD_SIMULATOR)
   _display = new SimDisplayDriver();
   _touch = new SimTouchDriver();
   _storage = new SimStorageDriver();
+  _network = new CurlNetwork();
 #endif
 }
 
 Device::~Device() {
+  delete _network;
   delete _storage;
   delete _touch;
   delete _display;
@@ -58,6 +65,7 @@ void Device::init() {
   CH422G::setPin(CH422G_EXIO_LCD_BL, true);
 #endif
 
+  _network->init();
   _display->init();
   _storage->init();
 
@@ -81,3 +89,4 @@ void Device::init() {
 IDisplay &Device::display() { return *_display; }
 ITouch &Device::touchscreen() { return *_touch; }
 IStorage &Device::sdcard() { return *_storage; }
+INetwork &Device::network() { return *_network; }
