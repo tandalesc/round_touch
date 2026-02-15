@@ -1,8 +1,8 @@
 #ifndef _TOUCH_EVENT_T_
 #define _TOUCH_EVENT_T_
 
-#include "src/device/types/TouchLocation.h"
-#include "src/events/types/InputEvent.h"
+#include "device/types/TouchLocation.h"
+#include "events/types/InputEvent.h"
 
 enum class TouchType { UnknownType, SwipeType, TapType };
 enum class SwipeDirection {

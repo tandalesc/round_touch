@@ -1,4 +1,4 @@
-#include "src/application/interface/components/types/Layout.h"
+#include "application/interface/components/types/Layout.h"
 
 LayoutContext deriveLayout(LayoutContext &parent) {
   LayoutContext clone = parent;

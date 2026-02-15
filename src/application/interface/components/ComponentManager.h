@@ -5,22 +5,18 @@
 class Application;
 class Component;
 
-#include "src/config/Constants.h"
+#include "lvgl.h"
 
-#include "src/application/interface/components/types/Component.h"
-#include "src/application/interface/components/types/Layout.h"
-#include "src/application/workflow/Workflow.h"
-#include "src/events/EventHandler.h"
-#include "src/events/types/InputEvent.h"
+#include "application/interface/components/types/Component.h"
+#include "application/workflow/Workflow.h"
+#include "events/EventHandler.h"
+#include "events/types/InputEvent.h"
 
 class ComponentManager : public EventHandler<InputEvent> {
 private:
   Application *app;
   Component *active = nullptr;
-  LayoutContext rootLayout = {
-      .position = {.t = 40, .b = 40, .l = 12, .r = 12},
-      .preferredSize = {.width = SCREEN_MAX_WIDTH - (12 * 2),
-                        .height = SCREEN_MAX_HEIGHT - (40 * 2)}};
+  lv_obj_t *screen = nullptr;
 
 public:
   ComponentManager(Application *app) : app(app) {};
@@ -28,7 +24,6 @@ public:
 
   // component lifecycle
   void createComponent(State state);
-  void renderComponent();
   void deleteComponent();
 
   // event handling

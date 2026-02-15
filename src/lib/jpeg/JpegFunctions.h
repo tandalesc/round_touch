@@ -9,14 +9,20 @@
 
 #include <JPEGDEC.h>
 
-#include "src/config/Constants.h"
-#include "src/lib/jpeg/JpegIO.h"
-#include "src/lib/jpeg/JpegRender.h"
+#include "config/Constants.h"
+#include "device/IDisplay.h"
+#include "device/IStorage.h"
+#include "lib/jpeg/JpegIO.h"
+#include "lib/jpeg/JpegRender.h"
 
 static JPEGDEC _jpeg;
 
-static void drawJpeg(const char *filename, int x, int y, int widthLimit,
+static void drawJpeg(IDisplay &display, IStorage &storage,
+                     const char *filename, int x, int y, int widthLimit,
                      int heightLimit) {
+  _jpegDisplay = &display;
+  _jpegStorage = &storage;
+
   _jpeg.open(filename, jpegOpenFile, jpegCloseFile, jpegReadFile, jpegSeekFile,
              jpegDrawCallback);
 
@@ -41,10 +47,14 @@ static void drawJpeg(const char *filename, int x, int y, int widthLimit,
   _jpeg.setPixelType(RGB565_BIG_ENDIAN);
   _jpeg.decode(x, y, _scale);
   _jpeg.close();
+
+  _jpegDisplay = nullptr;
+  _jpegStorage = nullptr;
 }
 
-static void drawJpegFullscreen(const char *filename) {
-  drawJpeg(filename, 0, 0, SCREEN_MAX_WIDTH, SCREEN_MAX_HEIGHT);
+static void drawJpegFullscreen(IDisplay &display, IStorage &storage,
+                                const char *filename) {
+  drawJpeg(display, storage, filename, 0, 0, SCREEN_MAX_WIDTH, SCREEN_MAX_HEIGHT);
 }
 
 #endif // _JPEG_FUNCTIONS_H_

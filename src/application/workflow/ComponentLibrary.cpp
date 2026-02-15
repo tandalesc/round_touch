@@ -1,11 +1,16 @@
-#include "src/application/workflow/ComponentLibrary.h"
+#include "application/workflow/ComponentLibrary.h"
 
-#include "src/application/interface/components/types/Layout.h"
-#include "src/application/interface/components/layout/FlexLayout.h"
-#include "src/application/interface/components/input/TouchNavigation.h"
-#include "src/application/interface/components/input/StateChangeRule.h"
-#include "src/application/interface/components/core/FillScreen.h"
-#include "src/application/interface/components/core/Text.h"
+#include "application/interface/components/types/Layout.h"
+#include "application/interface/components/layout/FlexLayout.h"
+#include "application/interface/components/input/TouchNavigation.h"
+#include "application/interface/components/input/StateChangeRule.h"
+#include "application/interface/components/core/FillScreen.h"
+#include "application/interface/components/core/Text.h"
+
+// Color constants (hex RGB)
+#define CLR_BLACK   0x000000
+#define CLR_WHITE   0xFFFFFF
+#define CLR_GREEN   0x00FF00
 
 RenderableComponent createComponentFromState(State state) {
   if (state == NOT_STARTED) {
@@ -25,17 +30,16 @@ RenderableComponent createComponentFromState(State state) {
   } else if (state == DETAILS) {
     return DetailsState();
   }
+  return E(Component);
 }
 
 RenderableComponent DeviceNotStarted() {
-  Serial.println("Device not started.");
-  delay(10000);
   return E(Component);
 }
 
 RenderableComponent ErrorState() {
   return (
-    E(FillScreen, {BLACK},
+    E(FillScreen, {CLR_BLACK},
       E(TouchNavigation, onSwipeDown(READY)),
       E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
         E(Text, "Error!")
@@ -49,10 +53,10 @@ RenderableComponent ErrorState() {
 
 RenderableComponent EcoModeState() {
   return (
-    E(FillScreen, {.color = GREEN},
+    E(FillScreen, {.color = CLR_GREEN},
       E(TouchNavigation, onSwipeUp(READY)),
       E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
-        E(Text, {.color = BLACK}, "ECO Mode")
+        E(Text, {.color = CLR_BLACK}, "ECO Mode")
       )
     )
   );
@@ -60,7 +64,7 @@ RenderableComponent EcoModeState() {
 
 RenderableComponent ReadyState() {
   return (
-    E(FillScreen, {BLACK},
+    E(FillScreen, {CLR_BLACK},
       E(TouchNavigation, {
         onSwipeDown(ECOMODE),
         onSwipeLeft(INFO1),
@@ -80,7 +84,7 @@ RenderableComponent ReadyState() {
 
 RenderableComponent Info1State() {
   return (
-    E(FillScreen, {BLACK},
+    E(FillScreen, {CLR_BLACK},
       E(TouchNavigation, {
         onSwipeDown(ECOMODE),
         onSwipeLeft(INFO2),
@@ -95,7 +99,7 @@ RenderableComponent Info1State() {
 
 RenderableComponent Info2State() {
   return (
-    E(FillScreen, {BLACK},
+    E(FillScreen, {CLR_BLACK},
       E(TouchNavigation, {
         onSwipeDown(ECOMODE),
         onSwipeLeft(INFO3),
@@ -110,7 +114,7 @@ RenderableComponent Info2State() {
 
 RenderableComponent Info3State() {
   return (
-    E(FillScreen, {BLACK},
+    E(FillScreen, {CLR_BLACK},
       E(TouchNavigation, {
         onSwipeDown(ECOMODE),
         onSwipeRight(INFO2)
@@ -124,7 +128,7 @@ RenderableComponent Info3State() {
 
 RenderableComponent DetailsState() {
   return (
-    E(FillScreen, {BLACK},
+    E(FillScreen, {CLR_BLACK},
       E(TouchNavigation, onSwipeUp(READY)),
       E(FlexLayout, {.type = LayoutType::Column, .props = {.gap = 8}},
         E(FlexLayout, {.type = LayoutType::Column, .props = {.gap = 1}},

@@ -2,7 +2,7 @@
 #define _ARDUINO_GFX_LIBRARY_SHIM_H_
 
 #include "Arduino.h"
-#include "simulator/platform/SimDisplay.h"
+#include "platform/SimDisplay.h"
 
 // --- Arduino_GFX base class backed by SDL2 ---
 class Arduino_GFX {

@@ -1,10 +1,10 @@
 #ifndef _FILL_SCREEN_COMPONENT_H_
 #define _FILL_SCREEN_COMPONENT_H_
 
-#include "src/application/interface/components/types/ComponentWithChildren.h"
+#include "application/interface/components/types/ComponentWithChildren.h"
 
 struct FillScreenProps {
-  uint16_t color = BLACK;
+  uint32_t color = 0x000000;
 };
 
 class FillScreen : public ComponentWithChildren {
@@ -16,11 +16,21 @@ public:
   FillScreen(FillScreenProps props, T *...children)
       : ComponentWithChildren(children...), props(props){};
 
-  // applies gfx->fillScreen before rendering children
-  void render(Application *app) override {
-    auto gfx = app->device()->display().gfx;
-    gfx->fillScreen(this->props.color);
-    ComponentWithChildren::render(app);
+  void createWidgets(lv_obj_t *parent) override {
+    // FillScreen becomes the root flex container filling the screen
+    lvObj = lv_obj_create(parent);
+    lv_obj_remove_style_all(lvObj);
+    lv_obj_set_size(lvObj, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_style_bg_opa(lvObj, LV_OPA_COVER, 0);
+    lv_obj_set_style_bg_color(lvObj, lv_color_hex(props.color), 0);
+    // Center children both horizontally and vertically
+    lv_obj_set_flex_flow(lvObj, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(lvObj, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
+    // create children inside this container
+    for (auto &child : children) {
+      child->createWidgets(lvObj);
+    }
   }
 };
 

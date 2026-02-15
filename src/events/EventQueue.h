@@ -3,7 +3,7 @@
 
 #include <list>
 
-#include "src/events/EventHandler.h"
+#include "events/EventHandler.h"
 
 // basic generic message queue
 template <typename T> class EventQueue : public EventHandler<T> {

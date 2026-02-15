@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "src/application/Application.h"
+#include "application/Application.h"
 
 Device *Application::device() { return _device; }
 Workflow &Application::workflow() { return _workflow; }

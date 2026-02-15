@@ -1,10 +1,12 @@
-#include "src/application/Application.h"
+#include "lvgl.h"
 
-#include "src/application/interface/Interface.h"
-#include "src/application/interface/components/ComponentManager.h"
-#include "src/application/interface/components/types/Component.h"
+#include "application/Application.h"
 
-#include "src/events/types/TouchEvent.h"
+#include "application/interface/Interface.h"
+#include "application/interface/components/ComponentManager.h"
+#include "application/interface/components/types/Component.h"
+
+#include "events/types/TouchEvent.h"
 
 Interface::Interface(Application *app) {
   this->app = app;
@@ -17,9 +19,9 @@ Interface::~Interface() { delete manager; }
 void Interface::loop() {
   if (refresh) {
     manager->createComponent(app->workflow().getState());
-    manager->renderComponent();
     refresh = false;
   }
+  lv_timer_handler();
 }
 
 void Interface::handleEvent(InputEvent &event) {

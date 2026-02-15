@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Arduino.h>
+
 enum class EventType { UnknownEvent, SyntheticEvent, UserInputEvent };
 enum class InputType { UnknownInput, TouchInput, ButtonInput };
 

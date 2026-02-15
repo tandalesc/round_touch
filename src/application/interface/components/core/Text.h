@@ -1,11 +1,11 @@
 #ifndef _TEXT_COMPONENT_H_
 #define _TEXT_COMPONENT_H_
 
-#include "src/application/interface/components/types/Component.h"
+#include "application/interface/components/types/Component.h"
 
 struct TextProps {
   uint8_t size = 4;
-  uint16_t color = WHITE;
+  uint32_t color = 0xFFFFFF;
 };
 
 class Text : public Component {
@@ -13,25 +13,13 @@ class Text : public Component {
   const char *text = "";
 
 public:
-  Text(TextProps props, const char *text) : props(props), text(text) {
-    this->initializeSize();
-  };
+  Text(TextProps props, const char *text) : props(props), text(text) {};
   Text(const char *text) : Text({}, text) {};
 
-  void initializeSize() {
-    layout.size.width = strlen(text) * 6 * props.size;
-    layout.size.height = 8 * props.size;
-    layout.preferredSize = layout.size;
-  }
-
-  void calculateSize(LayoutContext &layout) override { initializeSize(); }
-
-  void render(Application *app) override {
-    auto gfx = app->device()->display().gfx;
-    gfx->setCursor(layout.position.l, layout.position.t);
-    gfx->setTextSize(props.size);
-    gfx->setTextColor(props.color);
-    gfx->print(text);
+  void createWidgets(lv_obj_t *parent) override {
+    lvObj = lv_label_create(parent);
+    lv_label_set_text(lvObj, text);
+    lv_obj_set_style_text_color(lvObj, lv_color_hex(props.color), 0);
   }
 };
 

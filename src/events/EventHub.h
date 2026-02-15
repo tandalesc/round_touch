@@ -1,8 +1,8 @@
 #pragma once
 
-#include "src/events/EventQueue.h"
-#include "src/events/types/TouchEvent.h"
-#include "src/events/types/WorkflowEvent.h"
+#include "events/EventQueue.h"
+#include "events/types/TouchEvent.h"
+#include "events/types/WorkflowEvent.h"
 
 class EventHub : public EventHandler<WorkflowEvent> {
 private:

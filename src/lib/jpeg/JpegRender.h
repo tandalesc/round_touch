@@ -3,10 +3,14 @@
 
 #include <JPEGDEC.h>
 
-#include "src/device/hw/Display.h"
+#include "device/IDisplay.h"
+
+// Global pointer set before JPEG decode, used by the callback
+static IDisplay *_jpegDisplay = nullptr;
 
 static int jpegDrawCallback(JPEGDRAW *pDraw) {
-  auto gfx = Display::getInstance().gfx;
+  if (!_jpegDisplay) return 0;
+  auto gfx = _jpegDisplay->gfx();
   gfx->draw16bitBeRGBBitmap(pDraw->x, pDraw->y, pDraw->pPixels, pDraw->iWidth,
                             pDraw->iHeight);
   return 1;

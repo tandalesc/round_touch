@@ -1,8 +1,8 @@
 #ifndef _COMPONENT_LIBRARY_H_
 #define _COMPONENT_LIBRARY_H_
 
-#include "src/application/interface/components/types/Component.h"
-#include "src/application/workflow/Workflow.h"
+#include "application/interface/components/types/Component.h"
+#include "application/workflow/Workflow.h"
 
 RenderableComponent createComponentFromState(State state);
 

@@ -1,25 +1,27 @@
 #ifndef _DEVICE_H_
 #define _DEVICE_H_
 
-#include "src/config/Constants.h"
+#include "config/Constants.h"
 
-#include "src/device/hw/Display.h"
-#include "src/device/hw/SDCard.h"
-#include "src/device/hw/Touch.h"
-
-#include "src/lib/jpeg/JpegFunctions.h"
+#include "device/IDisplay.h"
+#include "device/ITouch.h"
+#include "device/IStorage.h"
 
 class Device {
 private:
-  void showSplashScreen();
+  IDisplay *_display = nullptr;
+  ITouch *_touch = nullptr;
+  IStorage *_storage = nullptr;
 
 public:
-  void init();
-  void showMessage(const char *msg);
+  Device();
+  ~Device();
 
-  Display &display();
-  TouchScreen &touchscreen();
-  SDCard &sdcard();
+  void init();
+
+  IDisplay &display();
+  ITouch &touchscreen();
+  IStorage &sdcard();
 };
 
 #endif // _DEVICE_H_
