@@ -3,23 +3,28 @@
 
 #include "config/Constants.h"
 
-#include "device/hw/Display.h"
-#include "device/hw/SDCard.h"
-#include "device/hw/Touch.h"
-
-#include "lib/jpeg/JpegFunctions.h"
+#include "device/IDisplay.h"
+#include "device/ITouch.h"
+#include "device/IStorage.h"
 
 class Device {
 private:
+  IDisplay *_display = nullptr;
+  ITouch *_touch = nullptr;
+  IStorage *_storage = nullptr;
+
   void showSplashScreen();
 
 public:
+  Device();
+  ~Device();
+
   void init();
   void showMessage(const char *msg);
 
-  Display &display();
-  TouchScreen &touchscreen();
-  SDCard &sdcard();
+  IDisplay &display();
+  ITouch &touchscreen();
+  IStorage &sdcard();
 };
 
 #endif // _DEVICE_H_

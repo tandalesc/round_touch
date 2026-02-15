@@ -27,7 +27,7 @@ public:
   void calculateSize(LayoutContext &layout) override { initializeSize(); }
 
   void render(Application *app) override {
-    auto gfx = app->device()->display().gfx;
+    auto gfx = app->device()->display().gfx();
     gfx->setCursor(layout.position.l, layout.position.t);
     gfx->setTextSize(props.size);
     gfx->setTextColor(props.color);

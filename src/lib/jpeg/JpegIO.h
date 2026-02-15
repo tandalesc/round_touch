@@ -3,13 +3,15 @@
 
 #include <JPEGDEC.h>
 
-#include "device/hw/SDCard.h"
+#include "device/IStorage.h"
 
+// Global pointer set before JPEG decode, used by the callbacks
+static IStorage *_jpegStorage = nullptr;
 static File _f;
 
 static void *jpegOpenFile(const char *szFilename, int32_t *pFileSize) {
-  SDCard &sdcard = SDCard::getInstance();
-  _f = sdcard.open_r(szFilename);
+  if (!_jpegStorage) return nullptr;
+  _f = _jpegStorage->open_r(szFilename);
   *pFileSize = _f.size();
   return &_f;
 }

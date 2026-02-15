@@ -18,7 +18,7 @@ public:
 
   // applies gfx->fillScreen before rendering children
   void render(Application *app) override {
-    auto gfx = app->device()->display().gfx;
+    auto gfx = app->device()->display().gfx();
     gfx->fillScreen(this->props.color);
     ComponentWithChildren::render(app);
   }

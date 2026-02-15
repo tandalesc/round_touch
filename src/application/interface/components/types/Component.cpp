@@ -10,7 +10,7 @@ void Component::updateLayout(LayoutContext &layout) {
 }
 
 void Component::drawDebugBounds(Application *app) {
-  app->device()->display().gfx->drawRect(
+  app->device()->display().gfx()->drawRect(
       layout.position.l,
       layout.position.t,
       layout.preferredSize.width + layout.padding.l + layout.padding.r,

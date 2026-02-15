@@ -1,30 +1,6 @@
-#include "Touch.h"
+#include "device/hw/drivers/cst816s/CST816STouch.h"
 
-bool TouchScreen::available() { return driver->available(); }
-
-String TouchScreen::gesture() { return driver->gesture(); }
-
-TouchLocation TouchScreen::location() {
-  TouchLocation location = {driver->data.x, driver->data.y};
-  return location;
-}
-
-void TouchScreen::printDebugMessage() {
-  if (available()) {
-    TouchLocation location = this->location();
-    Serial.print(gesture());
-    // Serial.print("\t");
-    // Serial.print(touch.data.points);
-    // Serial.print("\t");
-    // Serial.print(touch.data.event);
-    Serial.print("\t");
-    Serial.print(location.x);
-    Serial.print("\t");
-    Serial.println(location.y);
-  }
-}
-
-void TouchScreen::pollEvent(EventHandler<InputEvent> *handler) {
+void CST816STouch::pollEvent(EventHandler<InputEvent> *handler) {
   if (!available()) {
     return;
   }

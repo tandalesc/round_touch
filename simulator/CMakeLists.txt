@@ -37,7 +37,6 @@ set(APP_SOURCES
     ../src/application/workflow/Workflow.cpp
     ../src/application/workflow/ComponentLibrary.cpp
     ../src/device/Device.cpp
-    ../src/device/hw/Touch.cpp
 )
 
 add_executable(round_touch_sim ${SIM_SOURCES} ${APP_SOURCES})
