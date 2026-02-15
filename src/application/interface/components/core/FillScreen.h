@@ -1,7 +1,7 @@
 #ifndef _FILL_SCREEN_COMPONENT_H_
 #define _FILL_SCREEN_COMPONENT_H_
 
-#include "src/application/interface/components/types/ComponentWithChildren.h"
+#include "application/interface/components/types/ComponentWithChildren.h"
 
 struct FillScreenProps {
   uint16_t color = BLACK;

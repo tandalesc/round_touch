@@ -1,12 +1,12 @@
 #include <SDL2/SDL.h>
 #include <cstdio>
 
-#include "simulator/platform/SimDisplay.h"
-#include "simulator/platform/SimTouch.h"
+#include "platform/SimDisplay.h"
+#include "platform/SimTouch.h"
 
 // These includes resolve against our shims due to include path ordering
-#include "src/device/Device.h"
-#include "src/application/Application.h"
+#include "device/Device.h"
+#include "application/Application.h"
 
 int main(int, char *[]) {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {

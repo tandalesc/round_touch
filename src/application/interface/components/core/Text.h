@@ -1,7 +1,7 @@
 #ifndef _TEXT_COMPONENT_H_
 #define _TEXT_COMPONENT_H_
 
-#include "src/application/interface/components/types/Component.h"
+#include "application/interface/components/types/Component.h"
 
 struct TextProps {
   uint8_t size = 4;

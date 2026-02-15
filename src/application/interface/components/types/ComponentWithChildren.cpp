@@ -1,4 +1,4 @@
-#include "src/application/interface/components/types/ComponentWithChildren.h"
+#include "application/interface/components/types/ComponentWithChildren.h"
 
 ComponentWithChildren::~ComponentWithChildren() {
   for (auto child : children) {

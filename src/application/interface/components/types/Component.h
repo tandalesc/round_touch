@@ -1,10 +1,10 @@
 #ifndef _COMPONENT_TYPES_H_
 #define _COMPONENT_TYPES_H_
 
-#include "src/application/Application.h"
-#include "src/application/interface/components/types/Layout.h"
-#include "src/events/EventHandler.h"
-#include "src/events/types/InputEvent.h"
+#include "application/Application.h"
+#include "application/interface/components/types/Layout.h"
+#include "events/EventHandler.h"
+#include "events/types/InputEvent.h"
 
 // helper define so you don't need the "new" keyword everywhere
 #define E(component, args...) new component(args)

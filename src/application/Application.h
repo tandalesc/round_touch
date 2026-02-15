@@ -1,12 +1,12 @@
 #ifndef _APPLICATION_H_
 #define _APPLICATION_H_
 
-#include "src/device/Device.h"
+#include "device/Device.h"
 
-#include "src/application/interface/Interface.h"
-#include "src/application/workflow/Workflow.h"
+#include "application/interface/Interface.h"
+#include "application/workflow/Workflow.h"
 
-#include "src/events/EventHub.h"
+#include "events/EventHub.h"
 
 class Application {
 private:

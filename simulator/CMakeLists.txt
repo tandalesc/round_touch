@@ -9,11 +9,12 @@ find_package(SDL2 REQUIRED)
 
 # Include paths - ORDER MATTERS
 # 1. Shims directory (overrides Arduino library headers like <Arduino.h>)
-# 2. Project root (resolves "src/..." include paths)
+# 2. src/ directory (include root for application code)
 # 3. SDL2 headers
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/shims
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src
     ${SDL2_INCLUDE_DIRS}
 )
 

@@ -1,4 +1,4 @@
-#include "src/application/interface/components/types/Component.h"
+#include "application/interface/components/types/Component.h"
 
 void Component::attachApplication(Application *app) { this->app = app; }
 

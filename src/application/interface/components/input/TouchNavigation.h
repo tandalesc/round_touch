@@ -4,9 +4,9 @@
 #include <initializer_list>
 #include <vector>
 
-#include "src/application/interface/components/input/StateChangeRule.h"
-#include "src/application/interface/components/types/Component.h"
-#include "src/events/types/TouchEvent.h"
+#include "application/interface/components/input/StateChangeRule.h"
+#include "application/interface/components/types/Component.h"
+#include "events/types/TouchEvent.h"
 
 class TouchNavigation : public Component {
   std::vector<StateChangeRule> rules;

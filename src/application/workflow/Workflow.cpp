@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
-#include "src/application/Application.h"
-#include "src/application/workflow/Workflow.h"
-#include "src/events/types/WorkflowEvent.h"
+#include "application/Application.h"
+#include "application/workflow/Workflow.h"
+#include "events/types/WorkflowEvent.h"
 
 State Workflow::getState() { return this->state; }
 

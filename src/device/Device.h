@@ -1,13 +1,13 @@
 #ifndef _DEVICE_H_
 #define _DEVICE_H_
 
-#include "src/config/Constants.h"
+#include "config/Constants.h"
 
-#include "src/device/hw/Display.h"
-#include "src/device/hw/SDCard.h"
-#include "src/device/hw/Touch.h"
+#include "device/hw/Display.h"
+#include "device/hw/SDCard.h"
+#include "device/hw/Touch.h"
 
-#include "src/lib/jpeg/JpegFunctions.h"
+#include "lib/jpeg/JpegFunctions.h"
 
 class Device {
 private:

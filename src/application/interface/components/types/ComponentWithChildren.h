@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "src/application/interface/components/types/Component.h"
-#include "src/events/types/TouchEvent.h"
+#include "application/interface/components/types/Component.h"
+#include "events/types/TouchEvent.h"
 
 // helper implementation to deal with having multiple child components.
 // you can pass child renderable components by using parameter expansion

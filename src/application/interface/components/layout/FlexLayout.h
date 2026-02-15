@@ -3,7 +3,7 @@
 
 #define DRAW_DEBUG false
 
-#include "src/application/interface/components/types/ComponentWithChildren.h"
+#include "application/interface/components/types/ComponentWithChildren.h"
 
 class FlexLayout : public ComponentWithChildren {
 private:

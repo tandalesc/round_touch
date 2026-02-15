@@ -1,11 +1,11 @@
-#include "src/application/workflow/ComponentLibrary.h"
+#include "application/workflow/ComponentLibrary.h"
 
-#include "src/application/interface/components/types/Layout.h"
-#include "src/application/interface/components/layout/FlexLayout.h"
-#include "src/application/interface/components/input/TouchNavigation.h"
-#include "src/application/interface/components/input/StateChangeRule.h"
-#include "src/application/interface/components/core/FillScreen.h"
-#include "src/application/interface/components/core/Text.h"
+#include "application/interface/components/types/Layout.h"
+#include "application/interface/components/layout/FlexLayout.h"
+#include "application/interface/components/input/TouchNavigation.h"
+#include "application/interface/components/input/StateChangeRule.h"
+#include "application/interface/components/core/FillScreen.h"
+#include "application/interface/components/core/Text.h"
 
 RenderableComponent createComponentFromState(State state) {
   if (state == NOT_STARTED) {

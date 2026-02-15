@@ -3,7 +3,7 @@
 
 #include <JPEGDEC.h>
 
-#include "src/device/hw/SDCard.h"
+#include "device/hw/SDCard.h"
 
 static File _f;
 

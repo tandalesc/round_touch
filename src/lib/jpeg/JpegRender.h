@@ -3,7 +3,7 @@
 
 #include <JPEGDEC.h>
 
-#include "src/device/hw/Display.h"
+#include "device/hw/Display.h"
 
 static int jpegDrawCallback(JPEGDRAW *pDraw) {
   auto gfx = Display::getInstance().gfx;

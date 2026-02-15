@@ -1,4 +1,4 @@
-#include "src/device/Device.h"
+#include "device/Device.h"
 
 void Device::init() {
   this->display();

@@ -1,7 +1,7 @@
 #ifndef _STATE_CHANGE_RULE_H_
 #define _STATE_CHANGE_RULE_H_
 
-#include "src/events/types/TouchEvent.h"
+#include "events/types/TouchEvent.h"
 
 struct StateChangeRule {
   TouchType type = TouchType::UnknownType;

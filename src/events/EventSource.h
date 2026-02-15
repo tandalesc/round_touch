@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/events/EventHandler.h"
+#include "events/EventHandler.h"
 
 template <typename T> class EventSource {
 public:

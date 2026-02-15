@@ -2,7 +2,7 @@
 #define _CST816S_SHIM_H_
 
 #include "Arduino.h"
-#include "simulator/platform/SimTouch.h"
+#include "platform/SimTouch.h"
 
 class CST816S {
 public:

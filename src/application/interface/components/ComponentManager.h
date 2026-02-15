@@ -5,13 +5,13 @@
 class Application;
 class Component;
 
-#include "src/config/Constants.h"
+#include "config/Constants.h"
 
-#include "src/application/interface/components/types/Component.h"
-#include "src/application/interface/components/types/Layout.h"
-#include "src/application/workflow/Workflow.h"
-#include "src/events/EventHandler.h"
-#include "src/events/types/InputEvent.h"
+#include "application/interface/components/types/Component.h"
+#include "application/interface/components/types/Layout.h"
+#include "application/workflow/Workflow.h"
+#include "events/EventHandler.h"
+#include "events/types/InputEvent.h"
 
 class ComponentManager : public EventHandler<InputEvent> {
 private:

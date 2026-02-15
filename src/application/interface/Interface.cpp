@@ -1,10 +1,10 @@
-#include "src/application/Application.h"
+#include "application/Application.h"
 
-#include "src/application/interface/Interface.h"
-#include "src/application/interface/components/ComponentManager.h"
-#include "src/application/interface/components/types/Component.h"
+#include "application/interface/Interface.h"
+#include "application/interface/components/ComponentManager.h"
+#include "application/interface/components/types/Component.h"
 
-#include "src/events/types/TouchEvent.h"
+#include "events/types/TouchEvent.h"
 
 Interface::Interface(Application *app) {
   this->app = app;

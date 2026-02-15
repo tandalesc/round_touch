@@ -3,9 +3,9 @@
 
 #include <CST816S.h>
 
-#include "src/device/types/TouchLocation.h"
-#include "src/events/EventSource.h"
-#include "src/events/types/TouchEvent.h"
+#include "device/types/TouchLocation.h"
+#include "events/EventSource.h"
+#include "events/types/TouchEvent.h"
 
 #define TOUCH_SDA 38
 #define TOUCH_SCL 39

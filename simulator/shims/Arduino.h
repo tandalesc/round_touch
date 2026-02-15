@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <string>
 
-#include "simulator/platform/SimTouch.h"
+#include "platform/SimTouch.h"
 
 // --- Types ---
 typedef uint8_t byte;

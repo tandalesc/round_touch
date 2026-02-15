@@ -4,10 +4,10 @@
 // forward declaration to avoid circular references
 class Application;
 
-#include "src/application/interface/components/ComponentManager.h"
-#include "src/events/EventHandler.h"
-#include "src/events/types/InputEvent.h"
-#include "src/events/types/WorkflowEvent.h"
+#include "application/interface/components/ComponentManager.h"
+#include "events/EventHandler.h"
+#include "events/types/InputEvent.h"
+#include "events/types/WorkflowEvent.h"
 
 class Interface : public EventHandler<InputEvent>,
                   public EventHandler<WorkflowEvent> {

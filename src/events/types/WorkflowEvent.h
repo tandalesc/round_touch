@@ -1,7 +1,7 @@
 #ifndef _WORKFLOW_EVENT_T_
 #define _WORKFLOW_EVENT_T_
 
-#include "src/application/workflow/Workflow.h"
+#include "application/workflow/Workflow.h"
 
 struct WorkflowEvent {
   enum Type { Update } type = Type::Update;
