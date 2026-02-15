@@ -6,6 +6,7 @@
 #include "device/hw/drivers/cst816s/CST816STouch.h"
 #include "device/hw/drivers/sdcard/SPISDCard.h"
 #elif defined(BOARD_WAVESHARE_S3_LCD_7)
+#include <Wire.h>
 #include "device/hw/drivers/ch422g/CH422G.h"
 #include "device/hw/drivers/rgb_panel/RGBPanelDisplay.h"
 #include "device/hw/drivers/gt911/GT911Touch.h"
@@ -38,30 +39,43 @@ Device::~Device() {
 
 void Device::init() {
 #ifdef BOARD_WAVESHARE_S3_LCD_7
-  // CH422G must be initialized first - it controls reset pins for LCD and touch
+  // CH422G must be initialized first — it controls reset lines for LCD and touch.
+  // Pin states are written before output mode is enabled to avoid glitching USB_SEL.
+  Wire.begin(TOUCH_SDA, TOUCH_SCL);
   CH422G::init();
-  CH422G::setAllOutput();
-  CH422G::setPin(CH422G_EXIO_LCD_RST, true);
+  CH422G::setPin(CH422G_EXIO_LCD_BL, false);
+
+  // GT911 reset: drive INT LOW during reset to select I2C address 0x5D
+  pinMode(TOUCH_INT, OUTPUT);
+  digitalWrite(TOUCH_INT, LOW);
+  CH422G::setPin(CH422G_EXIO_TP_RST, false);
+  delay(10);
   CH422G::setPin(CH422G_EXIO_TP_RST, true);
+  delay(50);
+  pinMode(TOUCH_INT, INPUT);
+  delay(50);
+
   CH422G::setPin(CH422G_EXIO_LCD_BL, true);
-  delay(100);
 #endif
 
   _display->init();
   _storage->init();
+
+#ifdef BOARD_WAVESHARE_S3_LCD_7
+  // Re-initialize I2C after RGB panel init — the panel driver invalidates
+  // the bus state, causing ESP_ERR_INVALID_STATE on subsequent I2C ops.
+  Wire.end();
+  Wire.begin(TOUCH_SDA, TOUCH_SCL);
+#endif
+
   _touch->init();
 
-  // Initialize LVGL and create the display driver
   lv_init();
 #ifndef BOARD_SIMULATOR
-  // Provide Arduino millis() as LVGL's tick source (SDL driver handles its own)
   lv_tick_set_cb((lv_tick_get_cb_t)millis);
 #endif
-  _display->initLVGL();
 
-  if (_storage->hasError()) {
-    Serial.println("SD Card initialization error");
-  }
+  _display->initLVGL();
 }
 
 IDisplay &Device::display() { return *_display; }

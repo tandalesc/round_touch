@@ -17,12 +17,16 @@ public:
       : ComponentWithChildren(children...), props(props){};
 
   void createWidgets(lv_obj_t *parent) override {
-    // FillScreen becomes the root container filling the screen
+    // FillScreen becomes the root flex container filling the screen
     lvObj = lv_obj_create(parent);
     lv_obj_remove_style_all(lvObj);
     lv_obj_set_size(lvObj, LV_PCT(100), LV_PCT(100));
     lv_obj_set_style_bg_opa(lvObj, LV_OPA_COVER, 0);
     lv_obj_set_style_bg_color(lvObj, lv_color_hex(props.color), 0);
+    // Center children both horizontally and vertically
+    lv_obj_set_flex_flow(lvObj, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(lvObj, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER,
+                          LV_FLEX_ALIGN_CENTER);
     // create children inside this container
     for (auto &child : children) {
       child->createWidgets(lvObj);

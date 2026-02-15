@@ -3,13 +3,17 @@
 void FlexLayout::createWidgets(lv_obj_t *parent) {
   lvObj = lv_obj_create(parent);
   lv_obj_remove_style_all(lvObj);
-  lv_obj_set_size(lvObj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+
+  // All flex containers fill parent width so centering works
+  lv_obj_set_width(lvObj, LV_PCT(100));
 
   // Set flex direction based on layout type
   if (layout.type == LayoutType::Row) {
     lv_obj_set_flex_flow(lvObj, LV_FLEX_FLOW_ROW);
+    lv_obj_set_height(lvObj, LV_SIZE_CONTENT);
   } else if (layout.type == LayoutType::Column) {
     lv_obj_set_flex_flow(lvObj, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_height(lvObj, LV_SIZE_CONTENT);
   }
 
   // Set alignment

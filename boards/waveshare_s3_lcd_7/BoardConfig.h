@@ -44,12 +44,13 @@
 #define SD_SCK 12
 #define SD_MISO 13
 
-// CH422G I/O Expander
-#define CH422G_I2C_ADDR 0x24
-#define CH422G_EXIO_TP_RST 1
-#define CH422G_EXIO_LCD_BL 2
-#define CH422G_EXIO_LCD_RST 3
-#define CH422G_EXIO_SD_CS 4
+// CH422G I/O Expander pin mapping (bit positions in WR_IO register)
+// IO5 = USB_SEL (MUST stay LOW for USB to work — do not set!)
+#define CH422G_EXIO_TP_RST 1   // EXIO1 = IO1
+#define CH422G_EXIO_LCD_BL 2   // EXIO2 = IO2
+#define CH422G_EXIO_LCD_RST 3  // EXIO3 = IO3
+#define CH422G_EXIO_SD_CS 4    // EXIO4 = IO4
+#define CH422G_EXIO_USB_SEL 5  // EXIO5 = IO5 (LOW=USB, HIGH=CAN)
 
 // Splash screen
 #define SPLASH_SCREEN_JPEG_PATH "/logo_800480.jpg"

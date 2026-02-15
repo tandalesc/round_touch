@@ -1,13 +1,15 @@
 #ifndef _GT911_TOUCH_H_
 #define _GT911_TOUCH_H_
 
+#include <Arduino.h>
 #include <Wire.h>
 
+#include "BoardConfig.h"
 #include "device/ITouch.h"
 #include "device/types/TouchLocation.h"
 #include "events/types/TouchEvent.h"
 
-// GT911 I2C address (0x5D when INT is HIGH during reset, 0x14 when LOW)
+// GT911 I2C address — 0x5D when INT is LOW during reset (set by Device::init)
 #define GT911_ADDR 0x5D
 
 // GT911 registers
@@ -19,8 +21,7 @@ public:
   GT911Touch() {}
 
   void init() override {
-    // Configure interrupt pin as input
-    pinMode(TOUCH_INT, INPUT);
+    writeReg(GT911_REG_STATUS, 0);
   }
 
   void pollEvent(EventHandler<InputEvent> *handler) override;

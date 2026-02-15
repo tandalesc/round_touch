@@ -67,6 +67,7 @@ using std::max;
 // --- Serial ---
 struct SerialShim {
   void begin(unsigned long) {}
+  void flush() { fflush(stdout); }
 
   void print(const char *s) { printf("%s", s); }
   void print(char c) { printf("%c", c); }

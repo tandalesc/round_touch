@@ -8,6 +8,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Board define - must be set before LVGL so lv_conf.h can use it
 add_compile_definitions(BOARD_SIMULATOR)
 
+# Allow overriding screen dimensions: cmake .. -DSCREEN_WIDTH=800 -DSCREEN_HEIGHT=480
+if(DEFINED SCREEN_WIDTH)
+    add_compile_definitions(SCREEN_WIDTH=${SCREEN_WIDTH})
+endif()
+if(DEFINED SCREEN_HEIGHT)
+    add_compile_definitions(SCREEN_HEIGHT=${SCREEN_HEIGHT})
+endif()
+
 # Find SDL2
 find_package(SDL2 REQUIRED)
 

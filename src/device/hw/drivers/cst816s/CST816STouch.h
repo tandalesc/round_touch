@@ -3,6 +3,7 @@
 
 #include <CST816S.h>
 
+#include "BoardConfig.h"
 #include "device/ITouch.h"
 #include "device/types/TouchLocation.h"
 #include "events/types/TouchEvent.h"

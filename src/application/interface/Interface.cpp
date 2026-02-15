@@ -21,7 +21,6 @@ void Interface::loop() {
     manager->createComponent(app->workflow().getState());
     refresh = false;
   }
-  // drive LVGL's internal timers (animation, rendering, etc.)
   lv_timer_handler();
 }
 

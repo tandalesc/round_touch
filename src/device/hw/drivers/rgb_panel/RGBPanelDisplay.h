@@ -4,11 +4,13 @@
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_rgb.h>
 
+#include "BoardConfig.h"
 #include "device/IDisplay.h"
 
 class RGBPanelDisplay : public IDisplay {
 private:
   esp_lcd_panel_handle_t _panel = nullptr;
+  uint16_t *_buf = nullptr;
 
   static void flushCb(lv_display_t *disp, const lv_area_t *area, uint8_t *px) {
     auto *self = (RGBPanelDisplay *)lv_display_get_user_data(disp);
@@ -20,6 +22,7 @@ private:
 public:
   RGBPanelDisplay() {}
   ~RGBPanelDisplay() {
+    free(_buf);
     if (_panel) {
       esp_lcd_panel_del(_panel);
     }
@@ -60,13 +63,11 @@ public:
     panel_config.timings.hsync_back_porch = 8;
     panel_config.timings.hsync_front_porch = 8;
     panel_config.timings.vsync_pulse_width = 4;
-    panel_config.timings.vsync_back_porch = 8;
-    panel_config.timings.vsync_front_porch = 8;
+    panel_config.timings.vsync_back_porch = 16;
+    panel_config.timings.vsync_front_porch = 16;
     panel_config.timings.flags.pclk_active_neg = 1;
 
     panel_config.flags.fb_in_psram = 1;
-    panel_config.num_fbs = 2;
-    panel_config.bounce_buffer_size_px = 10 * SCREEN_WIDTH;
 
     ESP_ERROR_CHECK(esp_lcd_new_rgb_panel(&panel_config, &_panel));
     ESP_ERROR_CHECK(esp_lcd_panel_reset(_panel));
@@ -79,13 +80,11 @@ public:
     lv_display_set_flush_cb(disp, flushCb);
     lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB565);
 
-    // Use the RGB panel's PSRAM framebuffers directly (zero-copy)
-    void *fb1 = nullptr;
-    void *fb2 = nullptr;
-    esp_lcd_rgb_panel_get_frame_buffer(_panel, 2, &fb1, &fb2);
-    lv_display_set_buffers(disp, fb1, fb2,
-                           SCREEN_WIDTH * SCREEN_HEIGHT * 2,
-                           LV_DISPLAY_RENDER_MODE_DIRECT);
+    // Allocate draw buffer in PSRAM (1/4 screen for good performance)
+    size_t buf_size = SCREEN_WIDTH * SCREEN_HEIGHT / 4 * sizeof(uint16_t);
+    _buf = (uint16_t *)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
+    lv_display_set_buffers(disp, _buf, nullptr, buf_size,
+                           LV_DISPLAY_RENDER_MODE_PARTIAL);
 
     return disp;
   }
