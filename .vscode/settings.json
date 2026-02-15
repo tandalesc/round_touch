@@ -47,5 +47,6 @@
         "compare": "cpp",
         "functional": "cpp",
         "utility": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/Users/shishirtandale/projects/round_touch/simulator"
 }

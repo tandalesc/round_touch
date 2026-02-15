@@ -2,3 +2,6 @@
 build
 .pio
 .vscode
+.claude
+.python-version
+.DS_Store
