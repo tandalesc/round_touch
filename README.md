@@ -1,6 +1,6 @@
 # round_touch
 
-Multi-board ESP32-S3 touch display framework with a declarative UI layer built on LVGL.
+Multi-board ESP32-S3 touch display framework with a declarative UI layer built on LVGL. Dashboards are defined as JSON manifests served over the network — edit them in the web UI, and devices pick up changes on next boot.
 
 ## Supported Boards
 
@@ -13,6 +13,7 @@ Multi-board ESP32-S3 touch display framework with a declarative UI layer built o
 ## Prerequisites
 
 - [uv](https://docs.astral.sh/uv/) (Python package manager, used to run PlatformIO)
+- Node.js 20+ (web editor)
 - SDL2 (simulator only): `brew install sdl2` on macOS
 - CMake 3.16+ (simulator only)
 
@@ -30,31 +31,92 @@ The `--recursive` flag pulls the LVGL v9.2.2 submodule at `lib/lvgl`. If you alr
 git submodule update --init --recursive
 ```
 
-## Build & Flash
+### Configuration
 
-### MakerFabs 1.28" Round
+Copy the config templates and fill in your values:
 
 ```bash
-# Build + upload + monitor serial
+cp src/config/NetworkConfig.h.example src/config/NetworkConfig.h
+cp src/config/HAConfig.h.example src/config/HAConfig.h
+```
+
+Edit `NetworkConfig.h` with your WiFi credentials and server URL. Edit `HAConfig.h` with your Home Assistant entity IDs.
+
+## First Flash (USB)
+
+The first time you flash a board — or any time you change the partition table — you must use USB:
+
+```bash
+# MakerFabs
 uv run pio run -e makerfabs_round_128 -t upload && uv run pio device monitor
 
-# Build only
-uv run pio run -e makerfabs_round_128
+# Waveshare
+uv run pio run -e waveshare_s3_lcd_7 -t upload && uv run pio device monitor
 ```
 
-### Waveshare 7" LCD
+After the initial flash, the device supports OTA updates and can be managed entirely from the server.
+
+## Running the Server
+
+The server handles OTA firmware updates and serves UI manifests to devices. It also hosts the web-based dashboard editor.
 
 ```bash
-# Build + upload + monitor serial
-uv run pio run -e waveshare_s3_lcd_7 -t upload && uv run pio device monitor
-
-# Build only
-uv run pio run -e waveshare_s3_lcd_7
+cd server
+pip install -r requirements.txt
+cd web && npm install && npm run build && cd ..
+python ota_server.py --config server.toml
 ```
 
-### Simulator
+Open `http://localhost:8080` to access the dashboard editor.
 
-The simulator uses SDL2 and CMake. Default resolution is 240x240 (MakerFabs).
+### Development Mode
+
+For frontend development with hot reload:
+
+```bash
+# Terminal 1 — Backend
+cd server && python ota_server.py --config server.toml
+
+# Terminal 2 — Frontend dev server
+cd server/web && npm run dev
+```
+
+The Vite dev server at `http://localhost:5173` proxies API calls to the backend.
+
+### Docker
+
+```bash
+cd server
+docker build -t round-touch-server .
+docker run -p 8080:8080 \
+  -v $(pwd)/ui:/app/ui \
+  -v $(pwd)/../.pio/build:/app/firmware \
+  round-touch-server
+```
+
+The `ui/` volume persists dashboard manifests. The `firmware/` volume provides binaries for OTA.
+
+### OTA Updates
+
+Once the server is running, subsequent firmware updates go over the network:
+
+1. Build the firmware: `uv run pio run -e makerfabs_round_128`
+2. The server serves the binary from `.pio/build/{board}/firmware.bin`
+3. Devices check for updates on boot and can be triggered from the System Shade (swipe down)
+
+No USB required after the first flash — just rebuild and the device picks it up.
+
+## Dashboard Editor
+
+The web editor at `http://localhost:8080` lets you visually edit device dashboards:
+
+- Select a board, manage screen tabs, build component trees via forms
+- Toggle to raw JSON mode for direct editing
+- Save to write changes — devices load the updated manifest on next boot
+
+Per-board manifests live at `server/ui/{board}/screens.json`.
+
+## Simulator
 
 ```bash
 # Build (240x240 default)
@@ -67,42 +129,49 @@ cd simulator/build && cmake .. -DSCREEN_WIDTH=800 -DSCREEN_HEIGHT=480 && make -j
 ./round_touch_sim
 ```
 
+The simulator connects to the same server as real hardware.
+
 ## Architecture
 
 ```
 Device                          Board abstraction (IDisplay, ITouch, IStorage)
   hw/drivers/                   Per-board hardware drivers
-    gc9a01/                     SPI display via esp_lcd (MakerFabs)
-    rgb_panel/                  RGB parallel display via esp_lcd (Waveshare)
-    gt911/                      I2C touch (Waveshare)
-    cst816s/                    I2C touch (MakerFabs)
-    ch422g/                     I/O expander (Waveshare)
 
 Application(&device)
-  Workflow                      State machine for screen navigation
-  Interface                     Drives LVGL rendering + input dispatch
+  Workflow                      State machine (system states 0-31, user states 32+)
+  Interface                     LVGL rendering + input dispatch
     ComponentManager            Creates/destroys component trees on state change
-    Components                  Declarative UI via E() macro DSL
-      FillScreen                Full-screen flex container with background color
-      FlexLayout                Row/Column flex with alignment and gap
-      Text                      LVGL label with size and color
-      TouchNavigation           Swipe/tap → state transition rules
+    ComponentRegistry           Maps type names to factory functions
+    UserScreenManager           Parses JSON manifests, builds component trees on demand
 
-Events
-  EventQueue<Event>             Pub/sub for touch and workflow events
+Server
+  ota_server.py                 FastAPI: OTA firmware + UI manifests + editor API
+  web/                          React SPA dashboard editor
+  ui/{board}/screens.json       Per-board JSON manifests
 ```
 
 ### Declarative UI
 
-Screens are defined as component trees using the `E()` macro:
+System screens are compiled C++ using the `E()` macro. User dashboards are JSON manifests served from the server:
 
 ```cpp
-E(FillScreen, {.color = 0x00FF00},
-  E(TouchNavigation, onSwipeUp(READY)),
-  E(FlexLayout, {.type = LayoutType::Row, .align = Align::Center},
-    E(Text, {.color = 0x000000}, "ECO Mode")
-  )
+E(FillScreen, {},
+  E(TouchNavigation, onSwipeUp(GO_BACK)),
+  E(Text, {.size = 4}, LV_SYMBOL_SETTINGS " System")
 )
+```
+
+```json
+{
+  "type": "FlexLayout",
+  "props": {"direction": "column", "align": "center", "gap": 12},
+  "children": [
+    {"type": "Text", "props": {"size": 4}, "text": "\uF015 Home"},
+    {"type": "Card", "children": [
+      {"type": "HAWeather", "entity": "weather.home"}
+    ]}
+  ]
+}
 ```
 
 ## Board-Specific Notes
