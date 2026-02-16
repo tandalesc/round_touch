@@ -9,7 +9,6 @@
 #include "BoardConfig.h"
 #include "device/IDisplay.h"
 #include "esp_lcd_gc9a01.h"
-#include "draw/sw/lv_draw_sw.h"
 
 #define GC9A01_BUF_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT / 10)
 
@@ -20,44 +19,38 @@ private:
   lv_display_t *_disp = nullptr;
   uint16_t *_buf1 = nullptr;
   uint16_t *_buf2 = nullptr;
-  uint16_t *_rotBuf = nullptr;
+  bool _flipped = false; // tracks current 180° state
+
+  void applyRotation(bool flip) {
+    if (_flipped == flip) return;
+    _flipped = flip;
+    // Base orientation: MX=true, MY=false.
+    // 180° rotation: toggle both → MX=false, MY=true.
+    esp_lcd_panel_mirror(_panel, !flip, flip);
+  }
 
   static void flushCb(lv_display_t *disp, const lv_area_t *area, uint8_t *px) {
     auto *self = (GC9A01Display *)lv_display_get_user_data(disp);
-    const lv_area_t *flush_area = area;
-    lv_area_t rotated_area;
 
-    if (lv_display_get_rotation(disp) == LV_DISPLAY_ROTATION_180) {
-      lv_color_format_t cf = lv_display_get_color_format(disp);
-      int32_t w = lv_area_get_width(area);
-      int32_t h = lv_area_get_height(area);
-      uint32_t stride = lv_draw_buf_width_to_stride(w, cf);
-
-      lv_draw_sw_rotate(px, self->_rotBuf, w, h, stride, stride,
-                        LV_DISPLAY_ROTATION_180, cf);
-      px = (uint8_t *)self->_rotBuf;
-
-      rotated_area = *area;
-      lv_display_rotate_area(disp, &rotated_area);
-      flush_area = &rotated_area;
-    }
+    // Use hardware MADCTL mirror for 180° rotation — no software pixel
+    // manipulation needed, eliminating the rotation buffer and artifacts.
+    bool flip = lv_display_get_rotation(disp) == LV_DISPLAY_ROTATION_180;
+    self->applyRotation(flip);
 
     // Byte-swap RGB565 for SPI big-endian
     uint16_t *p = (uint16_t *)px;
-    uint32_t num_px = (flush_area->x2 - flush_area->x1 + 1) *
-                      (flush_area->y2 - flush_area->y1 + 1);
+    uint32_t num_px = lv_area_get_width(area) * lv_area_get_height(area);
     for (uint32_t i = 0; i < num_px; i++) {
       p[i] = (p[i] >> 8) | (p[i] << 8);
     }
-    esp_lcd_panel_draw_bitmap(self->_panel, flush_area->x1, flush_area->y1,
-                              flush_area->x2 + 1, flush_area->y2 + 1, px);
+    esp_lcd_panel_draw_bitmap(self->_panel, area->x1, area->y1,
+                              area->x2 + 1, area->y2 + 1, px);
     lv_display_flush_ready(disp);
   }
 
 public:
   GC9A01Display() {}
   ~GC9A01Display() {
-    free(_rotBuf);
     free(_buf1);
     free(_buf2);
     if (_panel) esp_lcd_panel_del(_panel);
@@ -110,7 +103,6 @@ public:
     size_t buf_bytes = GC9A01_BUF_SIZE * sizeof(uint16_t);
     _buf1 = (uint16_t *)heap_caps_malloc(buf_bytes, MALLOC_CAP_DMA);
     _buf2 = (uint16_t *)heap_caps_malloc(buf_bytes, MALLOC_CAP_DMA);
-    _rotBuf = (uint16_t *)heap_caps_malloc(buf_bytes, MALLOC_CAP_DMA);
     lv_display_set_buffers(_disp, _buf1, _buf2, buf_bytes,
                            LV_DISPLAY_RENDER_MODE_PARTIAL);
 

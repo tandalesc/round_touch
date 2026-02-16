@@ -5,8 +5,9 @@
 #include "application/interface/components/types/ComponentWithChildren.h"
 #include "events/types/TouchEvent.h"
 
-// Pixels scrolled per swipe gesture
-#define SCROLL_STEP 80
+// Scroll step scales with screen height — small on 240px, large on 480px
+#define SCROLL_STEP_SMALL 80
+#define SCROLL_STEP_LARGE 200
 
 struct ScrollContainerProps {
   int pad = 16;
@@ -48,7 +49,7 @@ public:
     int padV = props.pad;
     if (app != nullptr && app->device()->display().isCircular()) {
       int h = app->device()->display().height();
-      padV = h * 12 / 100; // ~28px on 240px display
+      padV = h * 18 / 100; // ~43px on 240px display
     }
     lv_obj_set_style_pad_left(lvObj, props.pad, 0);
     lv_obj_set_style_pad_right(lvObj, props.pad, 0);
@@ -90,18 +91,23 @@ public:
     int scrollY = lv_obj_get_scroll_y(lvObj);
     int scrollBottom = lv_obj_get_scroll_bottom(lvObj);
 
+    // Scale scroll step and animation to screen size
+    bool isLarge = h > 300;
+    int step = isLarge ? SCROLL_STEP_LARGE : SCROLL_STEP_SMALL;
+    lv_anim_enable_t anim = isLarge ? LV_ANIM_OFF : LV_ANIM_ON;
+
     if (se.direction == SwipeDirection::SwipeUp) {
       // Swipe up = scroll content down (reveal more below)
       if (scrollBottom <= 0) return; // already at bottom
-      int dy = -SCROLL_STEP;
+      int dy = -step;
       if (-dy > scrollBottom) dy = -scrollBottom;
-      lv_obj_scroll_by(lvObj, 0, dy, LV_ANIM_ON);
+      lv_obj_scroll_by(lvObj, 0, dy, anim);
     } else {
       // Swipe down = scroll content up (reveal more above)
       if (scrollY <= 0) return; // already at top
-      int dy = SCROLL_STEP;
+      int dy = step;
       if (dy > scrollY) dy = scrollY;
-      lv_obj_scroll_by(lvObj, 0, dy, LV_ANIM_ON);
+      lv_obj_scroll_by(lvObj, 0, dy, anim);
     }
   }
 };

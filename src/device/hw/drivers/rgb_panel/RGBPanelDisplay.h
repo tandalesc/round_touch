@@ -14,17 +14,20 @@ private:
   uint16_t *_buf1 = nullptr;
   uint16_t *_buf2 = nullptr;
   uint16_t *_rotBuf = nullptr;
+  static lv_display_t *_lvDisp;
 
   static void flushCb(lv_display_t *disp, const lv_area_t *area, uint8_t *px) {
     auto *self = (RGBPanelDisplay *)lv_display_get_user_data(disp);
     const lv_area_t *flush_area = area;
     lv_area_t rotated_area;
 
+    // Software 180° rotation — RGB panels have no MADCTL register,
+    // so we reverse the pixel data and mirror the area coordinates.
     if (lv_display_get_rotation(disp) == LV_DISPLAY_ROTATION_180) {
       lv_color_format_t cf = lv_display_get_color_format(disp);
       int32_t w = lv_area_get_width(area);
       int32_t h = lv_area_get_height(area);
-      uint32_t stride = lv_draw_buf_width_to_stride(w, cf);
+      uint32_t stride = w * lv_color_format_get_size(cf);
 
       lv_draw_sw_rotate(px, self->_rotBuf, w, h, stride, stride,
                         LV_DISPLAY_ROTATION_180, cf);
@@ -37,7 +40,15 @@ private:
 
     esp_lcd_panel_draw_bitmap(self->_panel, flush_area->x1, flush_area->y1,
                               flush_area->x2 + 1, flush_area->y2 + 1, px);
-    lv_display_flush_ready(disp);
+  }
+
+  // ISR: draw_bitmap finished copying into the framebuffer.
+  // Signal LVGL that the draw buffer can be reused.
+  static bool onColorTransDone(esp_lcd_panel_handle_t panel,
+                               const esp_lcd_rgb_panel_event_data_t *edata,
+                               void *user_ctx) {
+    lv_display_flush_ready(_lvDisp);
+    return false;
   }
 
 public:
@@ -79,7 +90,7 @@ public:
     panel_config.data_gpio_nums[14] = LCD_R6;
     panel_config.data_gpio_nums[15] = LCD_R7;
 
-    panel_config.timings.pclk_hz = 21000000;
+    panel_config.timings.pclk_hz = 16000000;
     panel_config.timings.h_res = SCREEN_WIDTH;
     panel_config.timings.v_res = SCREEN_HEIGHT;
     panel_config.timings.hsync_pulse_width = 4;
@@ -92,26 +103,35 @@ public:
 
     panel_config.flags.fb_in_psram = 1;
 
-    // Bounce buffers in internal SRAM prevent display corruption when WiFi
-    // (or other peripherals) contend for the PSRAM bus. The RGB LCD DMA
-    // reads from these small internal buffers instead of directly from
-    // PSRAM, decoupling display refresh from SPIRAM bus traffic.
-    panel_config.bounce_buffer_size_px = SCREEN_WIDTH * 20;
+    // Bounce buffers in internal SRAM decouple LCD DMA from PSRAM bus.
+    // The DMA reads from these fast SRAM buffers instead of directly
+    // from PSRAM, preventing tearing and corruption from bus contention.
+    panel_config.bounce_buffer_size_px = SCREEN_WIDTH * 10;
 
     ESP_ERROR_CHECK(esp_lcd_new_rgb_panel(&panel_config, &_panel));
     ESP_ERROR_CHECK(esp_lcd_panel_reset(_panel));
     ESP_ERROR_CHECK(esp_lcd_panel_init(_panel));
+
+    // Register ISR callback: fires when draw_bitmap finishes copying
+    // the LVGL draw buffer into the framebuffer, so LVGL can start
+    // rendering the next dirty area into the other draw buffer.
+    esp_lcd_rgb_panel_event_callbacks_t cbs = {};
+    cbs.on_color_trans_done = onColorTransDone;
+    ESP_ERROR_CHECK(
+        esp_lcd_rgb_panel_register_event_callbacks(_panel, &cbs, nullptr));
   }
 
   lv_display_t *initLVGL() override {
     lv_display_t *disp = lv_display_create(SCREEN_WIDTH, SCREEN_HEIGHT);
+    _lvDisp = disp;
     lv_display_set_user_data(disp, this);
     lv_display_set_flush_cb(disp, flushCb);
     lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB565);
 
-    // Double draw buffers in PSRAM — one is flushed to the panel via DMA
-    // while LVGL renders into the other, reducing PSRAM bus stalls.
-    size_t buf_size = SCREEN_WIDTH * SCREEN_HEIGHT / 8 * sizeof(uint16_t);
+    // Two LVGL draw buffers in PSRAM, each 1/4 screen. LVGL renders
+    // into one while the other is being copied to the framebuffer
+    // (completion signaled by on_color_trans_done ISR).
+    size_t buf_size = SCREEN_WIDTH * SCREEN_HEIGHT / 4 * sizeof(uint16_t);
     _buf1 = (uint16_t *)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
     _buf2 = (uint16_t *)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
     _rotBuf = (uint16_t *)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
@@ -124,5 +144,7 @@ public:
   int width() override { return SCREEN_WIDTH; }
   int height() override { return SCREEN_HEIGHT; }
 };
+
+lv_display_t *RGBPanelDisplay::_lvDisp = nullptr;
 
 #endif // _RGB_PANEL_DISPLAY_H_
