@@ -710,10 +710,12 @@ The existing OTA server is Python FastAPI. Options for the full server:
 **Database:**
 - **Dev/prototype:** SQLite. Zero config, file-based, shipped with Python.
   Good enough for <100 devices and months of telemetry.
-- **Production:** PostgreSQL + TimescaleDB extension. TimescaleDB gives
-  automatic time-series partitioning for telemetry data, retention
-  policies, and continuous aggregates (e.g., hourly averages). Runs
-  nicely in a container alongside the server on the LXC.
+- **Production:** PostgreSQL. Plain Postgres with a timestamp index on
+  the telemetry table handles the expected scale (handful of devices,
+  telemetry every 30s) without extensions. Periodic retention cleanup
+  via cron (`DELETE WHERE time < now() - interval '90 days'`). If
+  scale ever demands it, TimescaleDB is a drop-in Postgres extension
+  that adds automatic partitioning — no schema changes needed.
 - **Schema sketch:**
   ```sql
   -- Device registry
@@ -726,7 +728,7 @@ The existing OTA server is Python FastAPI. Options for the full server:
     created_at TIMESTAMPTZ DEFAULT now()
   )
 
-  -- Time-series telemetry (TimescaleDB hypertable)
+  -- Time-series telemetry (indexed on time, partition later if needed)
   telemetry (
     time TIMESTAMPTZ NOT NULL,
     device_id TEXT REFERENCES devices,
@@ -762,16 +764,18 @@ The existing OTA server is Python FastAPI. Options for the full server:
 
 ### Dashboard
 
-Separate concern from the server API. Options:
-- **Minimal:** Server renders HTML with HTMX for live updates. No JS
-  framework needed. WebSocket pushes DOM fragments. Extremely lightweight.
-- **Standard:** React/Vue SPA served as static files. Connects to server
-  via its own WebSocket for real-time device state. Chart.js or Recharts
-  for telemetry graphs.
-- **Recommendation:** Start with HTMX — it's the fastest path to a
-  functional dashboard and matches the "keep it simple" philosophy. If the
-  UI grows complex enough to need component state management, migrate to
-  a SPA later.
+Vite + React (or Vue) SPA. The server is a pure API — REST for CRUD,
+WebSocket for real-time — and the frontend is a static build artifact
+served from the same process or nginx.
+
+- Vite for fast dev iteration (HMR).
+- WebSocket hook/store on the client for real-time device state updates.
+- Charting library (Recharts, uPlot, or Chart.js) for telemetry
+  visualization.
+- Component reuse across dashboard views (device cards, log viewers,
+  config editors).
+- Production build is static files — deploy alongside the API server or
+  behind a reverse proxy.
 
 Dashboard views:
 - **Device list** — all registered devices, online/offline status, firmware
