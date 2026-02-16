@@ -1,9 +1,30 @@
 #include "device/hw/drivers/gt911/GT911Touch.h"
+#include "BoardConfig.h"
+#include "lvgl.h"
 
 #include <cmath>
 
 // Swipe detection thresholds
 #define SWIPE_MIN_DISTANCE 50
+
+static TouchLocation flipTouch(TouchLocation loc) {
+  if (lv_display_get_rotation(NULL) == LV_DISPLAY_ROTATION_180) {
+    loc.x = SCREEN_WIDTH - 1 - loc.x;
+    loc.y = SCREEN_HEIGHT - 1 - loc.y;
+  }
+  return loc;
+}
+
+static SwipeDirection flipSwipe(SwipeDirection dir) {
+  if (lv_display_get_rotation(NULL) != LV_DISPLAY_ROTATION_180) return dir;
+  switch (dir) {
+    case SwipeDirection::SwipeUp: return SwipeDirection::SwipeDown;
+    case SwipeDirection::SwipeDown: return SwipeDirection::SwipeUp;
+    case SwipeDirection::SwipeLeft: return SwipeDirection::SwipeRight;
+    case SwipeDirection::SwipeRight: return SwipeDirection::SwipeLeft;
+    default: return dir;
+  }
+}
 
 void GT911Touch::pollEvent(EventHandler<InputEvent> *handler) {
   uint8_t status = readReg(GT911_REG_STATUS);
@@ -36,7 +57,7 @@ void GT911Touch::pollEvent(EventHandler<InputEvent> *handler) {
     int dist = (int)sqrt(dx * dx + dy * dy);
 
     if (dist < SWIPE_MIN_DISTANCE) {
-      TapTouchEvent event = TapTouchEvent(_touchStart);
+      TapTouchEvent event = TapTouchEvent(flipTouch(_touchStart));
       handler->handleEvent(event);
     } else {
       SwipeDirection dir;
@@ -45,7 +66,8 @@ void GT911Touch::pollEvent(EventHandler<InputEvent> *handler) {
       } else {
         dir = dy > 0 ? SwipeDirection::SwipeDown : SwipeDirection::SwipeUp;
       }
-      SwipeTouchEvent event = SwipeTouchEvent(dir);
+      dir = flipSwipe(dir);
+      SwipeTouchEvent event = SwipeTouchEvent(dir, flipTouch(_touchStart));
       handler->handleEvent(event);
     }
   }

@@ -17,6 +17,9 @@ public:
   // Get the state string for an entity (e.g., "on", "off", "unavailable")
   String getEntityState(const char *entityId);
 
+  // Get a specific attribute value as string (e.g., "temperature", "friendly_name")
+  String getEntityAttribute(const char *entityId, const char *attrKey);
+
   // Toggle an entity. Returns true on success.
   bool toggle(const char *entityId);
 

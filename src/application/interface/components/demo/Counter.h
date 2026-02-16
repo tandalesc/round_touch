@@ -11,7 +11,7 @@ class Counter : public StatefulComponent {
 public:
   void createWidgets(lv_obj_t *parent) override {
     label = lv_label_create(parent);
-    lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_color(label, lv_color_hex(0xFAFAFA), 0); // zinc-50
     update();
   }
 

@@ -10,4 +10,7 @@
 #define HA_BASE_URL "http://homeassistant.local:8123"
 #define HA_ACCESS_TOKEN "your-long-lived-access-token"
 
+#define OTA_UPDATE_URL "http://192.168.1.100:8080"
+#define OTA_SECRET_KEY "your-pre-shared-key-here"
+
 #endif // _NETWORK_CONFIG_H_

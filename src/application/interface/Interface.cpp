@@ -6,6 +6,7 @@
 #include "application/interface/components/ComponentManager.h"
 #include "application/interface/components/types/Component.h"
 
+#include "application/interface/Toast.h"
 #include "events/types/TouchEvent.h"
 
 Interface::Interface(Application *app) {
@@ -25,6 +26,10 @@ void Interface::loop() {
 }
 
 void Interface::handleEvent(InputEvent &event) {
+  // Route input to the Toast overlay first. If it consumes the event
+  // (toast was visible), suppress component input so swipe/tap rules
+  // don't fire underneath it.
+  if (Toast::handleEvent(event)) return;
   // manager needs to dispatch this event to the active components
   manager->handleEvent(event);
 }

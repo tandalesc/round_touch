@@ -20,23 +20,44 @@ private:
   lv_display_t *_disp = nullptr;
   uint16_t *_buf1 = nullptr;
   uint16_t *_buf2 = nullptr;
+  uint16_t *_rotBuf = nullptr;
 
   static void flushCb(lv_display_t *disp, const lv_area_t *area, uint8_t *px) {
     auto *self = (GC9A01Display *)lv_display_get_user_data(disp);
+    const lv_area_t *flush_area = area;
+    lv_area_t rotated_area;
+
+    if (lv_display_get_rotation(disp) == LV_DISPLAY_ROTATION_180) {
+      lv_color_format_t cf = lv_display_get_color_format(disp);
+      int32_t w = lv_area_get_width(area);
+      int32_t h = lv_area_get_height(area);
+      uint32_t stride = lv_draw_buf_width_to_stride(w, cf);
+
+      lv_draw_sw_rotate(px, self->_rotBuf, w, h, stride, stride,
+                        LV_DISPLAY_ROTATION_180, cf);
+      px = (uint8_t *)self->_rotBuf;
+
+      rotated_area = *area;
+      lv_display_rotate_area(disp, &rotated_area);
+      flush_area = &rotated_area;
+    }
+
     // Byte-swap RGB565 for SPI big-endian
     uint16_t *p = (uint16_t *)px;
-    uint32_t num_px = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1);
+    uint32_t num_px = (flush_area->x2 - flush_area->x1 + 1) *
+                      (flush_area->y2 - flush_area->y1 + 1);
     for (uint32_t i = 0; i < num_px; i++) {
       p[i] = (p[i] >> 8) | (p[i] << 8);
     }
-    esp_lcd_panel_draw_bitmap(self->_panel, area->x1, area->y1,
-                              area->x2 + 1, area->y2 + 1, px);
+    esp_lcd_panel_draw_bitmap(self->_panel, flush_area->x1, flush_area->y1,
+                              flush_area->x2 + 1, flush_area->y2 + 1, px);
     lv_display_flush_ready(disp);
   }
 
 public:
   GC9A01Display() {}
   ~GC9A01Display() {
+    free(_rotBuf);
     free(_buf1);
     free(_buf2);
     if (_panel) esp_lcd_panel_del(_panel);
@@ -89,6 +110,7 @@ public:
     size_t buf_bytes = GC9A01_BUF_SIZE * sizeof(uint16_t);
     _buf1 = (uint16_t *)heap_caps_malloc(buf_bytes, MALLOC_CAP_DMA);
     _buf2 = (uint16_t *)heap_caps_malloc(buf_bytes, MALLOC_CAP_DMA);
+    _rotBuf = (uint16_t *)heap_caps_malloc(buf_bytes, MALLOC_CAP_DMA);
     lv_display_set_buffers(_disp, _buf1, _buf2, buf_bytes,
                            LV_DISPLAY_RENDER_MODE_PARTIAL);
 
@@ -97,6 +119,7 @@ public:
 
   int width() override { return SCREEN_WIDTH; }
   int height() override { return SCREEN_HEIGHT; }
+  bool isCircular() override { return true; }
 };
 
 #endif // _GC9A01_DISPLAY_H_

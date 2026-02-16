@@ -1,13 +1,16 @@
 #include <Arduino.h>
 
 #include "application/Application.h"
+#include "application/interface/Toast.h"
 #include "config/NetworkConfig.h"
+#include "config/Version.h"
 
 Device *Application::device() { return _device; }
 Workflow &Application::workflow() { return _workflow; }
 Interface &Application::interface() { return _interface; }
 EventHub &Application::eventhub() { return _eventhub; }
 HomeAssistant *Application::ha() { return _ha; }
+OTAUpdate *Application::ota() { return _ota; }
 
 void Application::init() {
   // subscribe interface to workflow events
@@ -22,14 +25,34 @@ void Application::init() {
   } else {
     Serial.println("Network not connected — HA service unavailable.");
   }
+  // initialize OTA update service if network is available
+  if (device()->network().isConnected()) {
+    _ota = new OTAUpdate(&device()->network(), OTA_UPDATE_URL, OTA_SECRET_KEY);
+    Serial.println("OTA update service initialized.");
+  }
   // kick start application by navigating to first state
   workflow().navigate(READY);
+  // check for firmware updates on boot and show toast if available
+  if (_ota != nullptr && _ota->checkForUpdate()) {
+    char msg[64];
+    snprintf(msg, sizeof(msg), "Firmware v%s available",
+             _ota->availableVersion().c_str());
+    Toast::show(msg, {
+      .label = "Update",
+      .callback = [](void *ctx) {
+        auto *self = static_cast<Application *>(ctx);
+        self->workflow().navigate(INFO3);
+      },
+      .userData = this,
+    });
+  }
   Serial.println("Initialized Application.");
 }
 
 Application::~Application() {
   // unsubscribe interface from events at the end of lifecycle
   eventhub().workflowEvents().unsubscribe(&interface());
+  delete _ota;
   delete _ha;
 }
 

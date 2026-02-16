@@ -45,7 +45,8 @@ public:
       else if (gesture == "SWIPE DOWN") direction = SwipeDirection::SwipeUp;
       else if (gesture == "SWIPE LEFT") direction = SwipeDirection::SwipeLeft;
       else if (gesture == "SWIPE RIGHT") direction = SwipeDirection::SwipeRight;
-      SwipeTouchEvent event = SwipeTouchEvent(direction);
+      TouchLocation loc = {pos.first, pos.second};
+      SwipeTouchEvent event = SwipeTouchEvent(direction, loc);
       handler->handleEvent(event);
       return;
     }

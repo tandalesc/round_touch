@@ -5,6 +5,7 @@
 
 #include "application/interface/Interface.h"
 #include "application/services/HomeAssistant.h"
+#include "application/services/OTAUpdate.h"
 #include "application/workflow/Workflow.h"
 
 #include "events/EventHub.h"
@@ -16,6 +17,7 @@ private:
   Interface _interface;
   EventHub _eventhub;
   HomeAssistant *_ha = nullptr;
+  OTAUpdate *_ota = nullptr;
 
 public:
   Application(Device *device)
@@ -29,6 +31,7 @@ public:
   Interface &interface();
   EventHub &eventhub();
   HomeAssistant *ha();
+  OTAUpdate *ota();
 };
 
 #endif // _APPLICATION_H_

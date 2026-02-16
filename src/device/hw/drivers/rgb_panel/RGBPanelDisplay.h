@@ -6,23 +6,46 @@
 
 #include "BoardConfig.h"
 #include "device/IDisplay.h"
+#include "draw/sw/lv_draw_sw.h"
 
 class RGBPanelDisplay : public IDisplay {
 private:
   esp_lcd_panel_handle_t _panel = nullptr;
-  uint16_t *_buf = nullptr;
+  uint16_t *_buf1 = nullptr;
+  uint16_t *_buf2 = nullptr;
+  uint16_t *_rotBuf = nullptr;
 
   static void flushCb(lv_display_t *disp, const lv_area_t *area, uint8_t *px) {
     auto *self = (RGBPanelDisplay *)lv_display_get_user_data(disp);
-    esp_lcd_panel_draw_bitmap(self->_panel, area->x1, area->y1,
-                              area->x2 + 1, area->y2 + 1, px);
+    const lv_area_t *flush_area = area;
+    lv_area_t rotated_area;
+
+    if (lv_display_get_rotation(disp) == LV_DISPLAY_ROTATION_180) {
+      lv_color_format_t cf = lv_display_get_color_format(disp);
+      int32_t w = lv_area_get_width(area);
+      int32_t h = lv_area_get_height(area);
+      uint32_t stride = lv_draw_buf_width_to_stride(w, cf);
+
+      lv_draw_sw_rotate(px, self->_rotBuf, w, h, stride, stride,
+                        LV_DISPLAY_ROTATION_180, cf);
+      px = (uint8_t *)self->_rotBuf;
+
+      rotated_area = *area;
+      lv_display_rotate_area(disp, &rotated_area);
+      flush_area = &rotated_area;
+    }
+
+    esp_lcd_panel_draw_bitmap(self->_panel, flush_area->x1, flush_area->y1,
+                              flush_area->x2 + 1, flush_area->y2 + 1, px);
     lv_display_flush_ready(disp);
   }
 
 public:
   RGBPanelDisplay() {}
   ~RGBPanelDisplay() {
-    free(_buf);
+    free(_rotBuf);
+    free(_buf1);
+    free(_buf2);
     if (_panel) {
       esp_lcd_panel_del(_panel);
     }
@@ -56,7 +79,7 @@ public:
     panel_config.data_gpio_nums[14] = LCD_R6;
     panel_config.data_gpio_nums[15] = LCD_R7;
 
-    panel_config.timings.pclk_hz = 16000000;
+    panel_config.timings.pclk_hz = 21000000;
     panel_config.timings.h_res = SCREEN_WIDTH;
     panel_config.timings.v_res = SCREEN_HEIGHT;
     panel_config.timings.hsync_pulse_width = 4;
@@ -69,6 +92,12 @@ public:
 
     panel_config.flags.fb_in_psram = 1;
 
+    // Bounce buffers in internal SRAM prevent display corruption when WiFi
+    // (or other peripherals) contend for the PSRAM bus. The RGB LCD DMA
+    // reads from these small internal buffers instead of directly from
+    // PSRAM, decoupling display refresh from SPIRAM bus traffic.
+    panel_config.bounce_buffer_size_px = SCREEN_WIDTH * 20;
+
     ESP_ERROR_CHECK(esp_lcd_new_rgb_panel(&panel_config, &_panel));
     ESP_ERROR_CHECK(esp_lcd_panel_reset(_panel));
     ESP_ERROR_CHECK(esp_lcd_panel_init(_panel));
@@ -80,10 +109,13 @@ public:
     lv_display_set_flush_cb(disp, flushCb);
     lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB565);
 
-    // Allocate draw buffer in PSRAM (1/4 screen for good performance)
-    size_t buf_size = SCREEN_WIDTH * SCREEN_HEIGHT / 4 * sizeof(uint16_t);
-    _buf = (uint16_t *)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
-    lv_display_set_buffers(disp, _buf, nullptr, buf_size,
+    // Double draw buffers in PSRAM — one is flushed to the panel via DMA
+    // while LVGL renders into the other, reducing PSRAM bus stalls.
+    size_t buf_size = SCREEN_WIDTH * SCREEN_HEIGHT / 8 * sizeof(uint16_t);
+    _buf1 = (uint16_t *)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
+    _buf2 = (uint16_t *)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
+    _rotBuf = (uint16_t *)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
+    lv_display_set_buffers(disp, _buf1, _buf2, buf_size,
                            LV_DISPLAY_RENDER_MODE_PARTIAL);
 
     return disp;

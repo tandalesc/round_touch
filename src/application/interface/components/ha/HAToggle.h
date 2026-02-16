@@ -9,6 +9,7 @@
 class HAToggle : public StatefulComponent {
   const char *entityId;
   String entityState = "unknown";
+  bool loading = true;
   lv_obj_t *nameLabel = nullptr;
   lv_obj_t *stateLabel = nullptr;
 
@@ -26,42 +27,75 @@ public:
 
     nameLabel = lv_label_create(lvObj);
     lv_label_set_text(nameLabel, entityId);
-    lv_obj_set_style_text_color(nameLabel, lv_color_hex(0xAAAAAA), 0);
+    lv_obj_set_style_text_color(nameLabel, lv_color_hex(0xA1A1AA), 0); // zinc-400
 
     stateLabel = lv_label_create(lvObj);
 
-    // Fetch initial state
-    refreshState();
+    // Show loading state; defer the blocking HTTP fetch so
+    // createWidgets() returns immediately and the screen renders first.
+    loading = true;
+    update();
+
+    lv_timer_t *t = lv_timer_create(deferredFetchCb, 50, this);
+    lv_timer_set_repeat_count(t, 1);
   }
 
   void update() override {
     if (stateLabel == nullptr) return;
+    if (loading) {
+      lv_label_set_text(stateLabel, LV_SYMBOL_REFRESH " Loading...");
+      lv_obj_set_style_text_color(stateLabel, lv_color_hex(0x71717A), 0); // zinc-500
+      return;
+    }
     bool isOn = entityState == "on";
-    lv_label_set_text(stateLabel, isOn ? "ON" : "OFF");
+    lv_label_set_text(stateLabel, isOn ? LV_SYMBOL_OK " ON" : LV_SYMBOL_CLOSE " OFF");
     lv_obj_set_style_text_color(stateLabel,
-                                lv_color_hex(isOn ? 0x00FF00 : 0xFF4444), 0);
+                                lv_color_hex(isOn ? 0x22C55E : 0xEF4444), 0);
   }
 
   void handleEvent(InputEvent &event) override {
+    if (lvObj == nullptr) return;
     if (event.inputType != InputType::TouchInput) return;
     TouchEvent &te = static_cast<TouchEvent &>(event);
     if (te.type != TouchType::TapType) return;
 
+    // Hit-test against this component's bounds
+    TapTouchEvent &tap = static_cast<TapTouchEvent &>(event);
+    lv_area_t area;
+    lv_obj_get_coords(lvObj, &area);
+    if (tap.location.x < area.x1 || tap.location.x > area.x2 ||
+        tap.location.y < area.y1 || tap.location.y > area.y2) return;
+
     if (app == nullptr) return;
     HomeAssistant *ha = app->ha();
     if (ha == nullptr) return;
+
+    loading = true;
+    update();
+    lv_timer_handler();
 
     ha->toggle(entityId);
     refreshState();
   }
 
 private:
+  static void deferredFetchCb(lv_timer_t *timer) {
+    auto *self = static_cast<HAToggle *>(lv_timer_get_user_data(timer));
+    self->refreshState();
+  }
+
   void refreshState() {
     if (app == nullptr) return;
     HomeAssistant *ha = app->ha();
-    if (ha == nullptr) return;
+    if (ha == nullptr) {
+      loading = false;
+      entityState = "unavailable";
+      update();
+      return;
+    }
 
     entityState = ha->getEntityState(entityId);
+    loading = false;
     update();
   }
 };
