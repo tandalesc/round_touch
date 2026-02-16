@@ -14,6 +14,11 @@ public:
     this->layout = layout;
   };
 
+  FlexLayout(LayoutContext layout, std::vector<RenderableComponent> kids)
+      : ComponentWithChildren(std::move(kids)), initial(layout) {
+    this->layout = layout;
+  };
+
   void createWidgets(lv_obj_t *parent) override;
 };
 

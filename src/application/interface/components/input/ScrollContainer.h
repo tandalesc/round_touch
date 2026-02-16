@@ -27,6 +27,9 @@ public:
   template <typename... T>
   ScrollContainer(T *...children) : ScrollContainer({}, children...) {};
 
+  ScrollContainer(ScrollContainerProps props, std::vector<RenderableComponent> kids)
+      : ComponentWithChildren(std::move(kids)), props(props) {};
+
   void createWidgets(lv_obj_t *parent) override {
     lvObj = lv_obj_create(parent);
     lv_obj_remove_style_all(lvObj);

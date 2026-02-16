@@ -20,13 +20,24 @@ public:
   template <typename... T>
   TitledCard(TitledCardProps props, T *...children)
       : ComponentWithChildren(children...), props(props) {
-    // Pre-format "icon title" string
+    formatTitle();
+  }
+
+  TitledCard(TitledCardProps props, std::vector<RenderableComponent> kids)
+      : ComponentWithChildren(std::move(kids)), props(props) {
+    formatTitle();
+  }
+
+private:
+  void formatTitle() {
     if (props.icon[0] != '\0') {
       snprintf(titleBuf, sizeof(titleBuf), "%s %s", props.icon, props.title);
     } else {
       snprintf(titleBuf, sizeof(titleBuf), "%s", props.title);
     }
   }
+
+public:
 
   void createWidgets(lv_obj_t *parent) override {
     lvObj = lv_obj_create(parent);
