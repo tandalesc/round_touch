@@ -4,6 +4,7 @@
 #include "application/interface/Toast.h"
 #include "config/NetworkConfig.h"
 #include "config/Version.h"
+#include "ui/registry/ComponentFactories.h"
 
 Device *Application::device() { return _device; }
 Workflow &Application::workflow() { return _workflow; }
@@ -11,13 +12,14 @@ Interface &Application::interface() { return _interface; }
 EventHub &Application::eventhub() { return _eventhub; }
 HomeAssistant *Application::ha() { return _ha; }
 OTAUpdate *Application::ota() { return _ota; }
+ComponentRegistry &Application::registry() { return _registry; }
+UserScreenManager &Application::userScreenManager() { return _userScreenManager; }
 
 void Application::init() {
   // subscribe interface to workflow events
-  // the interface will directly receive event information
-  // as soon as it happens without needing to periodically
-  // refresh.
   eventhub().workflowEvents().subscribe(&interface());
+  // register all component factories for JSON pipeline
+  registerAllComponents(_registry);
   // initialize Home Assistant service if network is available
   if (device()->network().isConnected()) {
     _ha = new HomeAssistant(&device()->network(), HA_BASE_URL, HA_ACCESS_TOKEN);
@@ -30,9 +32,24 @@ void Application::init() {
     _ota = new OTAUpdate(&device()->network(), OTA_UPDATE_URL, OTA_SECRET_KEY);
     Serial.println("OTA update service initialized.");
   }
-  // kick start application by navigating to first user screen
-  // (will be replaced with manifest default_screen once JSON pipeline is wired)
-  workflow().navigate(USER_STATE_BASE);
+  // fetch UI manifest from server
+  State defaultScreen = USER_STATE_BASE;
+  if (device()->network().isConnected()) {
+    char url[128];
+    snprintf(url, sizeof(url), "%s/api/ui/screens?board=%s",
+             OTA_UPDATE_URL, BOARD_ID);
+    HttpResponse resp = device()->network().get(url);
+    if (resp.statusCode == 200) {
+      if (_userScreenManager.loadManifest(resp.body.c_str())) {
+        defaultScreen = _userScreenManager.defaultScreen();
+        Serial.println("UI manifest loaded from server.");
+      }
+    } else {
+      Serial.printf("UI manifest fetch failed (HTTP %d)\n", resp.statusCode);
+    }
+  }
+  // navigate to first user screen (manifest default or fallback)
+  workflow().navigate(defaultScreen);
   // check for firmware updates on boot and show toast if available
   if (_ota != nullptr && _ota->checkForUpdate()) {
     char msg[64];

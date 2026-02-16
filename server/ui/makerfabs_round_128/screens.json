@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "default_screen": 32,
+  "tabs": [
+    {"id": 32, "icon": "\uF015", "label": "Home"},
+    {"id": 33, "icon": "\uF043", "label": "Gauges"}
+  ],
+  "screens": {
+    "32": {
+      "type": "FlexLayout",
+      "props": {"direction": "column", "align": "center", "gap": 8},
+      "children": [
+        {"type": "Text", "props": {"size": 3}, "text": "\uF015 Home"},
+        {"type": "Card", "children": [
+          {"type": "HAWeather", "entity": "weather.home"}
+        ]}
+      ]
+    },
+    "33": {
+      "type": "FlexLayout",
+      "props": {"direction": "column", "gap": 8},
+      "children": [
+        {"type": "Text", "props": {"size": 3}, "text": "\uF043 Gauges (from JSON!)"},
+        {"type": "GaugeCard", "props": {"label": "Coolant", "value": "185 F"}},
+        {"type": "GaugeCard", "props": {"label": "Oil", "value": "42 PSI"}}
+      ]
+    }
+  }
+}

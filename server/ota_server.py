@@ -1,30 +1,37 @@
 """
 OTA Update Server for round_touch firmware.
 
-Serves firmware binaries and version metadata for ESP32 OTA updates.
+Serves firmware binaries, version metadata, and UI screen manifests.
 Uses HMAC-SHA256 with a pre-shared key so devices can verify binary authenticity.
 
 Usage:
     python ota_server.py --config server.toml
 
-The server reads firmware binaries from the PlatformIO build output directory.
+The server reads firmware binaries from the PlatformIO build output directory
+and UI manifests from the ui directory.
 Expected layout:
     firmware_dir/
       makerfabs_round_128/
         firmware.bin
       waveshare_s3_lcd_7/
         firmware.bin
+    ui_dir/
+      makerfabs_round_128/
+        screens.json
+      simulator/
+        screens.json
 """
 
 import argparse
 import hashlib
 import hmac
+import json
 import sys
 import tomllib
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 app = FastAPI(title="round_touch OTA Server")
 
@@ -33,6 +40,7 @@ CONFIG = {
     "secret_key": "",
     "version": "",
     "port": 8080,
+    "ui_dir": "ui",
 }
 
 
@@ -86,6 +94,19 @@ async def firmware(board: str = Query(..., description="Board identifier")):
     )
 
 
+@app.get("/api/ui/screens")
+async def ui_screens(board: str = Query(..., description="Board identifier")):
+    ui_dir = Path(CONFIG["ui_dir"])
+    screens_path = ui_dir / board / "screens.json"
+    if not screens_path.exists():
+        raise HTTPException(404, f"No UI manifest for board: {board}")
+
+    with open(screens_path) as f:
+        manifest = json.load(f)
+
+    return JSONResponse(content=manifest)
+
+
 def main():
     import uvicorn
 
@@ -132,8 +153,10 @@ def main():
         print(f"Error: firmware directory '{firmware_dir}' does not exist")
         sys.exit(1)
 
+    ui_dir = Path(CONFIG["ui_dir"])
     print(f"OTA Server v{CONFIG['version']}")
     print(f"  Firmware dir: {firmware_dir.resolve()}")
+    print(f"  UI dir: {ui_dir.resolve()}")
     print(f"  Port: {CONFIG['port']}")
 
     # List available boards
