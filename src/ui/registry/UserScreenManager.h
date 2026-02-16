@@ -82,8 +82,12 @@ public:
     auto it = _screenJsons.find(state);
     if (it == _screenJsons.end()) return nullptr;
 
+    // Copy the stored JSON before parsing — deserializeJson mutates
+    // the input string in zero-copy mode, which would corrupt our store.
+    String jsonCopy = it->second;
+
     _activeDoc.clear();
-    DeserializationError err = deserializeJson(_activeDoc, it->second);
+    DeserializationError err = deserializeJson(_activeDoc, jsonCopy);
     if (err) {
       Serial.printf("[UserScreenManager] Screen %d parse error: %s\n",
                     state, err.c_str());
