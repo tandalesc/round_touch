@@ -12,7 +12,7 @@
       "children": [
         {"type": "Text", "props": {"size": 3}, "text": "\uF015 Home"},
         {"type": "Card", "children": [
-          {"type": "HAWeather", "entity": "weather.home"}
+          {"type": "HAWeather", "entity": "weather.forecast_home"}
         ]}
       ]
     },

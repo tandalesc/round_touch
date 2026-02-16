@@ -13,10 +13,10 @@
       "children": [
         {"type": "Text", "props": {"size": 4}, "text": "\uF015 Home"},
         {"type": "Card", "children": [
-          {"type": "HAWeather", "entity": "weather.home"}
+          {"type": "HAWeather", "entity": "weather.forecast_home"}
         ]},
         {"type": "Card", "children": [
-          {"type": "HAToggle", "entity": "light.living_room"}
+          {"type": "HAToggle", "entity": "light.living_room_lamp"}
         ]}
       ]
     },
@@ -41,7 +41,7 @@
           ]
         },
         {"type": "Card", "children": [
-          {"type": "HABinarySensor", "entity": "binary_sensor.garage_door", "label": "Garage Door"}
+          {"type": "HABinarySensor", "entity": "binary_sensor.shishir_presence", "label": "Shishir"}
         ]}
       ]
     }
