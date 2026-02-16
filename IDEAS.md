@@ -565,3 +565,285 @@ The GT911 re-init-after-RGB-panel hack in `Device.cpp` hints at this.
 Production I2C code should have bus recovery: toggle SCL 9 times to release
 a stuck slave, then send STOP condition. ESP-IDF's `i2c_master` driver
 has built-in bus recovery support.
+
+---
+
+## Architecture — Control Server (Conceptual)
+
+Unified server for OTA updates, device monitoring, remote configuration,
+and (eventually) Home Assistant integration. Runs on a dedicated LXC on the
+same LAN as the ESP32 devices.
+
+This section is a design reference, not a task list. Implementation is future
+work.
+
+### What Exists Today
+
+`server/ota_server.py` — a minimal FastAPI app that:
+- Serves firmware binaries from `.pio/build/{board}/firmware.bin`
+- Provides a `/api/version` endpoint (returns version + HMAC + size)
+- Provides a `/api/firmware` endpoint (streams the binary)
+- Config via `server.toml` (firmware_dir, secret_key, version, port)
+- No device registry, no telemetry, no config push
+
+On the device side:
+- `OTAUpdate` service checks `/api/version?board={BOARD_ID}`, compares
+  semver, downloads binary, verifies HMAC-SHA256, flashes.
+- `Version.h` defines `FIRMWARE_VERSION` ("0.0.0") and `BOARD_ID`.
+- Device identifies itself by `BOARD_ID` only — no unique device ID.
+
+### Target Architecture
+
+```
+                         LAN
+  ┌──────────────┐       │        ┌──────────────────────┐
+  │  ESP32       │──wss://──────→ │  LXC Control Server  │
+  │  Device A    │       │        │                      │
+  └──────────────┘       │        │  ┌─ WebSocket Hub ─┐ │
+                         │        │  │  Device sessions │ │
+  ┌──────────────┐       │        │  │  Auth + routing  │ │
+  │  ESP32       │──wss://──────→ │  └─────────────────┘ │
+  │  Device B    │       │        │                      │
+  └──────────────┘       │        │  ┌─ REST API ──────┐ │
+                         │        │  │  OTA endpoints   │ │
+  ┌──────────────┐       │        │  │  Device registry │ │
+  │  Browser     │──wss://──────→ │  │  Config CRUD     │ │
+  │  Dashboard   │       │        │  │  Telemetry query │ │
+  └──────────────┘       │        │  └─────────────────┘ │
+                         │        │                      │
+                         │        │  ┌─ DB ────────────┐ │
+                         │        │  │  Devices table   │ │
+                         │        │  │  Telemetry (TS)  │ │
+                         │        │  │  Config store    │ │
+                         │        │  │  OTA releases    │ │
+                         │        │  └─────────────────┘ │
+                         │        │                      │
+                         │        │  ┌─ MQTT bridge ───┐ │
+                         │        │  │  (optional)      │ │
+                         │        │  │  HA Discovery    │ │
+                         │        │  └─────────────────┘ │
+                         │        └──────────────────────┘
+```
+
+**Why WebSocket (device → server) instead of MQTT:**
+- Topology is simple: N devices → 1 server, 1 dashboard → 1 server.
+  No need for pub/sub fanout that justifies a broker.
+- One fewer process to run — no Mosquitto. The server IS the endpoint
+  for both devices and the browser dashboard.
+- Bidirectional on one connection: telemetry upstream, config + OTA
+  notifications downstream.
+- HA integration handled by the server bridging to MQTT (server is an
+  MQTT client, not a broker). Devices don't need to know about MQTT.
+- TLS via `wss://` — ESP32 connects outbound, no ports exposed on devices.
+
+### Device-Side Protocol
+
+Devices connect to `wss://server.local:8443/ws/device` on boot.
+
+**Connection lifecycle:**
+1. Device opens WebSocket, sends auth message:
+   ```json
+   {"type": "auth", "device_id": "abc123", "board": "makerfabs_round_128",
+    "fw_version": "1.2.3", "token": "pre-shared-device-token"}
+   ```
+2. Server validates token, registers device in DB (or updates last_seen).
+3. Server responds: `{"type": "auth_ok", "config": {...current config...}}`
+4. Bidirectional message flow begins.
+
+**Device → Server messages:**
+- `{"type": "telemetry", "heap": 245000, "min_heap": 220000,
+   "uptime_s": 86400, "rssi": -52, "fps": 48, "lvgl_idle_pct": 85}`
+  — sent every 30s (configurable).
+- `{"type": "log", "level": "warn", "tag": "HA",
+   "msg": "GET state failed: -1"}` — structured log forwarding.
+- `{"type": "event", "name": "ota_complete", "version": "1.2.4"}`
+  — lifecycle events (boot, ota_start, ota_complete, error, etc.).
+
+**Server → Device messages:**
+- `{"type": "config_update", "config": {"brightness": 80,
+   "refresh_interval_s": 30, "active_entities": ["light.living_room"]}}`
+  — pushed config changes. Device applies and stores in NVS (#20).
+- `{"type": "ota_available", "version": "1.2.4"}`
+  — server notifies device of new firmware. Device decides when to
+  download (could be immediate or deferred to user action).
+- `{"type": "ping"}` / `{"type": "pong"}`
+  — keepalive. Detect dead connections on both sides.
+
+**On disconnect:** Device reconnects with exponential backoff (1s, 2s, 4s,
+... 60s cap). Server marks device as offline after missing 3 pings.
+
+**Device identity:** Currently devices only have `BOARD_ID`. Need a unique
+`DEVICE_ID` — options:
+- Derive from ESP32 MAC address (`ESP.getEfuseMac()`) — unique per chip,
+  no provisioning needed.
+- Store in NVS during first provisioning.
+- MAC-derived is simplest and sufficient for a LAN deployment.
+
+### Server Implementation
+
+**Language choice:**
+
+The existing OTA server is Python FastAPI. Options for the full server:
+
+| | Python (FastAPI) | Go | Rust | TypeScript (Deno/Bun) |
+|---|---|---|---|---|
+| **Existing code** | Already have OTA server | Rewrite | Rewrite | Rewrite |
+| **WebSocket** | `websockets` or Starlette built-in | `gorilla/websocket` or stdlib | `tokio-tungstenite` | Native WS in Deno/Bun |
+| **Async** | asyncio (single-threaded) | goroutines (excellent) | tokio (excellent) | Event loop (good) |
+| **DB** | SQLAlchemy / raw SQL | `sqlx` / `pgx` | `sqlx` | Prisma / Drizzle |
+| **Dashboard** | Serve static files + Jinja | Serve static files + templ | Serve static + Askama | Full-stack (Next.js etc.) |
+| **Deploy** | pip + uvicorn | Single binary | Single binary | Single binary (Deno compile) |
+| **Prototyping speed** | Fastest | Medium | Slowest | Fast |
+
+**Recommendation: Python (FastAPI) for now, consider Go later.**
+- You already have a working FastAPI server. Extending it with WebSocket
+  support, a device registry, and telemetry storage is straightforward.
+- FastAPI's Starlette layer has native WebSocket support — same framework,
+  same process.
+- For a handful of devices on a LAN, Python's performance is more than
+  adequate. Async FastAPI handles thousands of concurrent WebSockets.
+- If the server grows complex enough to justify it, Go is the natural
+  next step (single binary deploy, great concurrency, easy cross-compile).
+- Rust is overkill for a device management server. TypeScript is viable
+  but doesn't offer advantages over Python here.
+
+**Database:**
+- **Dev/prototype:** SQLite. Zero config, file-based, shipped with Python.
+  Good enough for <100 devices and months of telemetry.
+- **Production:** PostgreSQL + TimescaleDB extension. TimescaleDB gives
+  automatic time-series partitioning for telemetry data, retention
+  policies, and continuous aggregates (e.g., hourly averages). Runs
+  nicely in a container alongside the server on the LXC.
+- **Schema sketch:**
+  ```sql
+  -- Device registry
+  devices (
+    device_id TEXT PRIMARY KEY,  -- MAC-derived
+    board TEXT NOT NULL,
+    fw_version TEXT,
+    config JSONB DEFAULT '{}',
+    last_seen TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT now()
+  )
+
+  -- Time-series telemetry (TimescaleDB hypertable)
+  telemetry (
+    time TIMESTAMPTZ NOT NULL,
+    device_id TEXT REFERENCES devices,
+    heap_free INT,
+    heap_min INT,
+    uptime_s BIGINT,
+    rssi INT,
+    fps INT,
+    lvgl_idle_pct INT
+  )
+
+  -- Structured log archive
+  device_logs (
+    time TIMESTAMPTZ NOT NULL,
+    device_id TEXT REFERENCES devices,
+    level TEXT,
+    tag TEXT,
+    message TEXT
+  )
+
+  -- OTA release tracking
+  releases (
+    id SERIAL PRIMARY KEY,
+    board TEXT NOT NULL,
+    version TEXT NOT NULL,
+    firmware_path TEXT,
+    hmac TEXT,
+    size INT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE(board, version)
+  )
+  ```
+
+### Dashboard
+
+Separate concern from the server API. Options:
+- **Minimal:** Server renders HTML with HTMX for live updates. No JS
+  framework needed. WebSocket pushes DOM fragments. Extremely lightweight.
+- **Standard:** React/Vue SPA served as static files. Connects to server
+  via its own WebSocket for real-time device state. Chart.js or Recharts
+  for telemetry graphs.
+- **Recommendation:** Start with HTMX — it's the fastest path to a
+  functional dashboard and matches the "keep it simple" philosophy. If the
+  UI grows complex enough to need component state management, migrate to
+  a SPA later.
+
+Dashboard views:
+- **Device list** — all registered devices, online/offline status, firmware
+  version, last seen, heap watermark.
+- **Device detail** — live telemetry graphs (heap, FPS, RSSI over time),
+  recent logs (streamed in real-time), config editor, OTA controls.
+- **OTA management** — upload firmware, select target board/devices, track
+  rollout progress.
+- **Fleet overview** — aggregate health (% online, % on latest firmware,
+  heap trends across devices).
+
+### Home Assistant Integration (Optional)
+
+The server acts as an MQTT client to bridge device data into HA:
+- On device connect/telemetry: publish to
+  `homeassistant/sensor/round_touch_{device_id}/state` with HA MQTT
+  Discovery config. Devices auto-appear as HA entities.
+- Expose: online status, firmware version, heap, RSSI, uptime as HA sensors.
+- HA automations can trigger on device events (e.g., "alert when any device
+  goes offline" or "notify when heap drops below threshold").
+- The devices themselves never touch MQTT — the server handles the bridge.
+  This keeps the device firmware simple and the MQTT integration swappable.
+
+### Security Model
+
+All LAN-internal, no cloud exposure.
+
+- **Transport:** `wss://` (TLS) for device↔server and browser↔server.
+  Self-signed cert is fine for LAN (devices trust the server's cert via
+  pinning or a pre-provisioned CA).
+- **Device auth:** Pre-shared token per device (or per board type). Stored
+  in NVS on the device. Server validates on WebSocket connect.
+- **Dashboard auth:** Session-based (cookie) or JWT. Since it's LAN-only,
+  even basic auth is acceptable for a personal deployment.
+- **OTA integrity:** Existing HMAC-SHA256 verification stays. Server signs
+  firmware with the pre-shared key, device verifies before flashing.
+- **Config push:** Server signs config payloads (HMAC or JWT) so devices
+  can verify authenticity. Prevents a compromised network from injecting
+  malicious config.
+
+### Foundation Work (What to Build Now)
+
+These items prepare the device firmware for the control server without
+building the server itself:
+
+1. **Unique device identity** — Derive `DEVICE_ID` from
+   `ESP.getEfuseMac()`. Store in a global accessible from Application.
+   Used for: server auth, telemetry tagging, MQTT topics.
+   Scope: ~10 lines in `Version.h` or a new `DeviceInfo.h`.
+
+2. **Structured logging (#15)** — `LOG(level, tag, fmt, ...)` macro with
+   a pluggable backend. Today: writes to Serial. Tomorrow: also sends
+   over WebSocket. The macro call sites don't change.
+   Scope: ~30 lines for the macro + Serial backend.
+
+3. **Telemetry collector** — A `Telemetry` struct/service that samples
+   heap, uptime, RSSI, FPS on a timer. Today: logs to Serial (or feeds
+   MetricsOverlay #8). Tomorrow: serializes to JSON and sends over
+   WebSocket.
+   Scope: ~40 lines.
+
+4. **Config persistence via NVS (#20)** — Read/write key-value pairs.
+   Today: stores rotation state, last tab. Tomorrow: stores server URL,
+   device token, pushed config from server.
+   Scope: ~50 lines for an NVS wrapper.
+
+5. **WebSocket client stub** — Add `esp_websocket_client` (ESP-IDF
+   component, already available) or `arduinoWebSockets` library. Create
+   an `IControlChannel` interface with `connect()`, `send()`,
+   `onMessage()`. Today: no-op or connects and sends telemetry.
+   Scope: ~100 lines for interface + ESP-IDF implementation.
+
+Items 1-4 are independently useful (improve logging, metrics, persistence)
+and lay groundwork for the server integration. Item 5 is the actual
+connection and can wait until the server exists.
