@@ -5,6 +5,195 @@ Each item includes context on what exists today and notes for implementation.
 
 ---
 
+## Critical — Production Hardening
+
+### P0. OTA Rollback
+
+**Problem:** If a bad firmware is pushed via OTA, every device that updates is
+bricked until USB reflash. There is no automatic recovery.
+
+**Current code:**
+- `OTAUpdate` in `src/application/services/OTAUpdate.cpp` uses Arduino `Update`
+  library to write firmware. After `Update.end(true)`, the device calls
+  `ESP.restart()`.
+- No call to `esp_ota_mark_app_valid_cancel_rollback()` anywhere.
+- ESP-IDF's bootloader supports automatic rollback: if the new app doesn't
+  confirm itself as valid within N boots, the bootloader reverts to the
+  previous partition.
+
+**Approach:**
+- Add `#include <esp_ota_ops.h>` to `Application.cpp`.
+- Call `esp_ota_mark_app_valid_cancel_rollback()` at the end of
+  `Application::init()` after everything has initialized successfully.
+- That's it. If init crashes or hangs before reaching that line, the bootloader
+  rolls back on next boot.
+- Requires `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y` in sdkconfig (check if
+  pioarduino sets this by default, otherwise add to `platformio.ini`
+  `board_build.cmake_extra_args`).
+
+**Estimated scope:** 2-3 lines of code + build config verification.
+
+---
+
+### P1. Watchdog Timer
+
+**Problem:** If the main loop hangs (blocked HTTP call with no timeout, I2C bus
+lockup, LVGL deadlock), the device is completely unresponsive with no recovery
+path except physical power cycle.
+
+**Current code:**
+- `Application::loop()` in `src/application/Application.cpp` runs:
+  `pollEvent()` → `interface().loop()` → `delay(20)`.
+- No watchdog registration. A blocking `_network->get()` call with a
+  non-responsive server will hang the loop for the HTTP timeout duration
+  (default ~15 seconds for HTTPClient).
+- During that time: no touch input, no LVGL render, no OTA check.
+
+**Approach:**
+- Enable ESP-IDF Task Watchdog Timer (TWDT):
+  ```cpp
+  #include <esp_task_wdt.h>
+  // In setup() or Application::init():
+  esp_task_wdt_config_t wdt_config = {
+      .timeout_ms = 10000,  // 10 second timeout
+      .idle_core_mask = 0,
+      .trigger_panic = true,  // reboot on timeout
+  };
+  esp_task_wdt_reconfigure(&wdt_config);
+  esp_task_wdt_add(NULL);  // add current task (loopTask)
+  ```
+- In `Application::loop()`, call `esp_task_wdt_reset()` each iteration.
+- If `loop()` takes >10s (blocked network call), the watchdog reboots the
+  device. Combined with OTA rollback (P0), this prevents permanent bricks.
+- Tune timeout based on worst-case legitimate loop time. 10s is conservative.
+- Simulator: stub out `esp_task_wdt_*` calls (they're ESP-IDF only).
+
+**Estimated scope:** ~10 lines in Application + shim stub for simulator.
+
+---
+
+### P2. Timer millis() Overflow Fix
+
+**Problem:** `Timer::running()` compares `millis() < timeout` where `timeout`
+is an absolute future timestamp. `millis()` overflows after ~49.7 days
+(uint32_t max). When it wraps to 0, `timeout` is still a large number,
+so `running()` returns true for the entire next 49-day cycle — debounce
+and workflow timers stay permanently "running."
+
+**Current code:**
+- `Timer` in `src/util/Timer.h`:
+  ```cpp
+  void start() { timeout = millis() + interval; }
+  bool running() { return millis() < timeout; }
+  ```
+- Used by: Workflow (100ms debounce), Button (200ms), HAToggle (300ms),
+  RotationToggle (200ms), TabBar (200ms).
+
+**Fix:**
+- Store start time instead of absolute timeout. Use unsigned subtraction
+  (which handles overflow correctly for uint32_t):
+  ```cpp
+  unsigned long startTime = 0;
+  bool started = false;
+  void start() { startTime = millis(); started = true; }
+  bool running() { return started && (millis() - startTime) < interval; }
+  ```
+- `(millis() - startTime)` wraps correctly because unsigned subtraction
+  modulo 2^32 gives the correct elapsed time even across overflow.
+
+**Estimated scope:** 3-line fix in Timer.h.
+
+---
+
+### P3. WiFi Reconnect
+
+**Problem:** If WiFi drops after boot, the device shows "unavailable" for all
+HA entities forever. No reconnect attempt, no user notification.
+
+**Current code:**
+- `ArduinoNetwork::init()` connects to WiFi with a 10-second timeout. If it
+  fails, `_connected = false` and that's permanent.
+- `Application::init()` checks `isConnected()` once at boot to decide whether
+  to create the HA and OTA services.
+- No periodic connectivity check in `Application::loop()`.
+
+**Approach:**
+- Add a `reconnect()` method to `INetwork` (default no-op for simulator).
+- In `ArduinoNetwork::reconnect()`: if `WiFi.status() != WL_CONNECTED`,
+  call `WiFi.reconnect()` with exponential backoff (1s, 2s, 4s, ... capped
+  at 60s).
+- In `Application::loop()`: periodically check
+  `device()->network().isConnected()`. On disconnect, show a Toast
+  ("WiFi disconnected") and start reconnect attempts. On reconnect, dismiss
+  Toast and re-initialize HA/OTA if they were null.
+- Check frequency: every 5-10 seconds (use a Timer).
+- Don't block the main loop — just call `WiFi.reconnect()` and check status
+  on the next cycle.
+
+**Estimated scope:** ~40 lines across ArduinoNetwork + Application.
+
+---
+
+### P4. Heap Monitoring
+
+**Problem:** On a device running 24/7, memory leaks or fragmentation can
+silently degrade performance until the device crashes. No visibility into
+heap state.
+
+**Current code:**
+- No heap monitoring anywhere. Arduino `String` concatenation in
+  `HomeAssistant.cpp` does heap allocation on every HTTP call
+  (`String(_baseUrl) + "/api/states/" + entityId`).
+- Component trees are `new`'d and `delete`'d on screen transitions — potential
+  for fragmentation over time.
+
+**Approach:**
+- In `Application::loop()`, periodically (every 30s) log:
+  ```cpp
+  Serial.printf("[HEAP] free=%d min=%d\n",
+      esp_get_free_heap_size(),
+      esp_get_minimum_free_heap_size());
+  ```
+- Set a critical threshold (~20KB). If free heap drops below it, log an error.
+  Optionally: graceful reboot via `ESP.restart()` (with OTA rollback
+  protection from P0).
+- Later: feed into MetricsOverlay (#8) for on-screen display.
+- Simulator: stub with a fixed large value or use platform malloc stats.
+
+**Estimated scope:** ~15 lines in Application::loop() + simulator stub.
+
+---
+
+### P5. String Allocation Hygiene
+
+**Problem:** Arduino `String` does heap allocation on every concatenation.
+`HomeAssistant.cpp` builds URLs with `String(_baseUrl) + "/api/states/" + entityId`
+on every call. Over thousands of calls across weeks of uptime, this fragments
+the heap.
+
+**Current code:**
+- `HomeAssistant::getEntityState()` and `getEntityAttribute()` each create
+  temporary `String` objects for URL construction.
+- `INetwork` interface returns `HttpResponse { int statusCode; String body; }`
+  — the `body` is a heap-allocated Arduino `String`.
+- `OTAUpdate` similarly builds URLs with `String` concatenation.
+
+**Approach:**
+- Replace URL construction with `snprintf` into a fixed stack buffer:
+  ```cpp
+  char url[256];
+  snprintf(url, sizeof(url), "%s/api/states/%s", _baseUrl, entityId);
+  ```
+- For `HttpResponse::body`: consider `std::string` (same heap allocation but
+  better allocator behavior) or keep `String` but document the tradeoff.
+- Low priority for the response body (it's allocated once per request and
+  freed immediately). High priority for URL construction (called repeatedly
+  in tight loops during screen render).
+
+**Estimated scope:** ~20 lines across HomeAssistant.cpp and OTAUpdate.cpp.
+
+---
+
 ## High Priority
 
 ### 1. HA Entity Cache (TTL-based)
@@ -308,12 +497,7 @@ Touch drivers already detect tap and swipe. Add a long-press detection
 (hold > 500ms without movement) to `TouchEvent` types. Enables contextual
 actions (hold a light → brightness slider, hold a tab → screen options).
 
-### 14. OTA Rollback
-
-ESP-IDF supports `esp_ota_mark_app_valid_cancel_rollback()`. If the app
-doesn't call this within N seconds of boot, the bootloader reverts to the
-previous partition. Add the call to `Application::init()` after successful
-startup, providing automatic brick protection.
+### 14. ~~OTA Rollback~~ → Moved to P0 (Critical)
 
 ### 15. Structured Logging
 
@@ -353,3 +537,31 @@ only be reachable from specific states (e.g., DETAILS only from LIGHTS).
 ESP32 has a built-in NVS (Non-Volatile Storage) partition for key-value
 pairs. Use it to persist user preferences (rotation state, last active tab,
 WiFi credentials, HA token) across reboots without needing an SD card.
+
+### 21. Credential Provisioning
+
+WiFi credentials and HA tokens are compile-time constants in gitignored
+headers. For production: need a runtime provisioning flow. Options:
+- **BLE provisioning** — ESP-IDF has `wifi_provisioning` component. Phone app
+  sends WiFi SSID/password over BLE, device stores in NVS (#20).
+- **Captive portal** — Device starts as AP, serves a web form, user enters
+  credentials from phone browser.
+- **Touchscreen entry** — Use Text Input (#17) for on-device credential entry.
+- Minimum viable: read from NVS first, fall back to hardcoded compile-time
+  values. This decouples the provisioning UI (can be added later) from the
+  storage mechanism.
+
+### 22. HTTPS Certificate Verification
+
+OTA update URL uses plain HTTP or unverified HTTPS. A MITM could serve
+malicious firmware (HMAC protects integrity but not if the attacker also
+controls the key). For production: pin the OTA server's certificate or use
+ESP-IDF's `esp_tls` with a CA bundle.
+
+### 23. I2C Bus Recovery
+
+ESP32 I2C bus can lock up if a slave holds SDA low (known hardware issue).
+The GT911 re-init-after-RGB-panel hack in `Device.cpp` hints at this.
+Production I2C code should have bus recovery: toggle SCL 9 times to release
+a stuck slave, then send STOP condition. ESP-IDF's `i2c_master` driver
+has built-in bus recovery support.
