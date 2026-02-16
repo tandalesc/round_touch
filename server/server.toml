@@ -10,5 +10,8 @@ secret_key = "change-me-to-a-real-secret"
 # Current firmware version (must be newer than device version to trigger update)
 version = "0.0.1"
 
+# Directory containing per-board UI manifests (board/screens.json)
+ui_dir = "ui"
+
 # Listen port
 port = 8080

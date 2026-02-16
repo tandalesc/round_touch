@@ -14,6 +14,9 @@ public:
   // use parameter expansion to populate children vector
   template <typename... T>
   ComponentWithChildren(T *...children) : children{children...} {};
+  // construct from a pre-built vector (used by JSON factory functions)
+  ComponentWithChildren(std::vector<RenderableComponent> kids)
+      : children(std::move(kids)) {};
   // if the parent is being deleted, then so are all of its children
   ~ComponentWithChildren();
   // by default, pass attach application call to all children

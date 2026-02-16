@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "default_screen": 32,
+  "tabs": [
+    {"id": 32, "icon": "\uF015", "label": "Home"},
+    {"id": 33, "icon": "\uF043", "label": "Gauges"},
+    {"id": 34, "icon": "\uF124", "label": "Car"}
+  ],
+  "screens": {
+    "32": {
+      "type": "FlexLayout",
+      "props": {"direction": "column", "align": "center", "gap": 12},
+      "children": [
+        {"type": "Text", "props": {"size": 4}, "text": "\uF015 Home"},
+        {"type": "Card", "children": [
+          {"type": "HAWeather", "entity": "weather.home"}
+        ]},
+        {"type": "Card", "children": [
+          {"type": "HAToggle", "entity": "light.living_room"}
+        ]},
+        {"type": "TitledCard", "props": {"icon": "\uF015", "title": "Presence"},
+          "children": [
+            {"type": "HABinarySensor", "entity": "binary_sensor.person_1", "label": "Person 1"},
+            {"type": "HABinarySensor", "entity": "binary_sensor.person_2", "label": "Person 2"}
+          ]
+        }
+      ]
+    },
+    "33": {
+      "type": "FlexLayout",
+      "props": {"direction": "column", "gap": 12},
+      "children": [
+        {"type": "Text", "props": {"size": 4}, "text": "\uF043 Gauges (from JSON!)"},
+        {"type": "GaugeCard", "props": {"label": "Coolant", "value": "185 F"}},
+        {"type": "GaugeCard", "props": {"label": "Oil Pressure", "value": "42 PSI"}},
+        {"type": "GaugeCard", "props": {"label": "Voltage", "value": "14.2 V"}}
+      ]
+    },
+    "34": {
+      "type": "FlexLayout",
+      "props": {"direction": "column", "align": "center", "gap": 12},
+      "children": [
+        {"type": "Text", "props": {"size": 4}, "text": "\uF124 Car"},
+        {"type": "TitledCard", "props": {"icon": "\uF0E7", "title": "Engine"},
+          "children": [
+            {"type": "Text", "text": "All systems nominal."}
+          ]
+        },
+        {"type": "Card", "children": [
+          {"type": "HABinarySensor", "entity": "binary_sensor.front_door", "label": "Front Door"}
+        ]}
+      ]
+    }
+  }
+}

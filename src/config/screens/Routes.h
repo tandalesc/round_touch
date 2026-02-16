@@ -4,6 +4,8 @@
 #include "application/interface/components/types/Component.h"
 #include "application/workflow/Workflow.h"
 
-RenderableComponent createComponentFromState(State state);
+class Application;
+
+RenderableComponent createComponentFromState(State state, Application *app);
 
 #endif // _ROUTES_H_

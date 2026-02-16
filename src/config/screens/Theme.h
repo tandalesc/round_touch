@@ -22,12 +22,4 @@
 #define CLR_RED       0xEF4444
 #define CLR_AMBER     0xF59E0B
 
-// Main navigation tabs shared across screens
-#define MAIN_TABS \
-  {LV_SYMBOL_HOME, "Home", READY}, \
-  {LV_SYMBOL_TINT, "Gauges", INFO1}, \
-  {LV_SYMBOL_BARS, "Tuning", INFO2}, \
-  {LV_SYMBOL_SETTINGS, "Settings", INFO3}, \
-  {LV_SYMBOL_DRIVE, "Car", LIGHTS}
-
 #endif // _SCREEN_THEME_H_
