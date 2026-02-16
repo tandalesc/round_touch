@@ -13,11 +13,17 @@
       "children": [
         {"type": "Text", "props": {"size": 4}, "text": "\uF015 Home"},
         {"type": "Card", "children": [
-          {"type": "HAWeather", "entity": "weather.forecast_home"}
+          {"type": "HAWeather", "entity": "weather.home"}
         ]},
         {"type": "Card", "children": [
-          {"type": "HAToggle", "entity": "light.living_room_lamp"}
-        ]}
+          {"type": "HAToggle", "entity": "light.living_room"}
+        ]},
+        {"type": "TitledCard", "props": {"icon": "\uF015", "title": "Presence"},
+          "children": [
+            {"type": "HABinarySensor", "entity": "binary_sensor.person_1", "label": "Person 1"},
+            {"type": "HABinarySensor", "entity": "binary_sensor.person_2", "label": "Person 2"}
+          ]
+        }
       ]
     },
     "33": {
@@ -41,7 +47,7 @@
           ]
         },
         {"type": "Card", "children": [
-          {"type": "HABinarySensor", "entity": "binary_sensor.shishir_presence", "label": "Shishir"}
+          {"type": "HABinarySensor", "entity": "binary_sensor.front_door", "label": "Front Door"}
         ]}
       ]
     }
