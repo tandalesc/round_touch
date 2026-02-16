@@ -2,11 +2,13 @@
 #define _ROTATION_TOGGLE_H_
 
 #include "application/interface/components/types/StatefulComponent.h"
+#include "application/interface/components/input/Button.h"
 #include "events/types/TouchEvent.h"
 
 class RotationToggle : public StatefulComponent {
   lv_obj_t *valueLabel = nullptr;
   bool flipped = false;
+  Timer debounce{200};
 
 public:
   void createWidgets(lv_obj_t *parent) override {
@@ -42,11 +44,9 @@ public:
     if (te.type != TouchType::TapType) return;
 
     TapTouchEvent &tap = static_cast<TapTouchEvent &>(event);
-    lv_area_t area;
-    lv_obj_get_coords(lvObj, &area);
-    if (tap.location.x < area.x1 || tap.location.x > area.x2 ||
-        tap.location.y < area.y1 || tap.location.y > area.y2)
-      return;
+    if (!Button::hitTest(lvObj, tap.location.x, tap.location.y)) return;
+    if (debounce.running()) return;
+    debounce.start();
 
     flipped = !flipped;
     lv_display_set_rotation(NULL,

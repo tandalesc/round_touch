@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "application/Application.h"
+#include "application/interface/components/input/Button.h"
 #include "application/interface/components/types/Component.h"
 #include "events/types/TouchEvent.h"
 
@@ -18,6 +19,7 @@ class TabBar : public Component {
   std::vector<TabBarItem> items;
   State activeState;
   std::vector<lv_obj_t *> tabObjs;
+  Timer debounce{200};
 
 public:
   TabBar(State activeState, std::initializer_list<TabBarItem> items)
@@ -102,13 +104,13 @@ public:
 
     TapTouchEvent &tap = static_cast<TapTouchEvent &>(event);
 
+    if (debounce.running()) return;
+
     for (size_t i = 0; i < tabObjs.size() && i < items.size(); i++) {
       if (items[i].state == activeState) continue;
 
-      lv_area_t area;
-      lv_obj_get_coords(tabObjs[i], &area);
-      if (tap.location.x >= area.x1 && tap.location.x <= area.x2 &&
-          tap.location.y >= area.y1 && tap.location.y <= area.y2) {
+      if (Button::hitTest(tabObjs[i], tap.location.x, tap.location.y)) {
+        debounce.start();
         app->workflow().navigate(items[i].state);
         return;
       }

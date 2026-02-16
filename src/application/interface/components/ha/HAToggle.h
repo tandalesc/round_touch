@@ -3,6 +3,7 @@
 
 #include "application/Application.h"
 #include "application/interface/components/types/StatefulComponent.h"
+#include "application/interface/components/input/Button.h"
 #include "application/services/HomeAssistant.h"
 #include "events/types/TouchEvent.h"
 
@@ -12,6 +13,7 @@ class HAToggle : public StatefulComponent {
   bool loading = true;
   lv_obj_t *nameLabel = nullptr;
   lv_obj_t *stateLabel = nullptr;
+  Timer debounce{300};
 
 public:
   HAToggle(const char *entityId) : entityId(entityId) {};
@@ -59,12 +61,10 @@ public:
     TouchEvent &te = static_cast<TouchEvent &>(event);
     if (te.type != TouchType::TapType) return;
 
-    // Hit-test against this component's bounds
     TapTouchEvent &tap = static_cast<TapTouchEvent &>(event);
-    lv_area_t area;
-    lv_obj_get_coords(lvObj, &area);
-    if (tap.location.x < area.x1 || tap.location.x > area.x2 ||
-        tap.location.y < area.y1 || tap.location.y > area.y2) return;
+    if (!Button::hitTest(lvObj, tap.location.x, tap.location.y)) return;
+    if (debounce.running()) return;
+    debounce.start();
 
     if (app == nullptr) return;
     HomeAssistant *ha = app->ha();

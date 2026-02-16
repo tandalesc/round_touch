@@ -35,17 +35,19 @@ RenderableComponent PresenceSection() {
 RenderableComponent LightSection() {
   return E(FlexLayout, {.type = LayoutType::Column, .props = {.gap = 8}},
     E(Text, {.size = 2, .color = CLR_ZINC_400}, LV_SYMBOL_POWER " Lights"),
-    E(Card, {.bg = CLR_ZINC_800, .border = CLR_ZINC_700},
-      E(HAToggle, HA_LIGHT_1)
-    ),
-    E(Card, {.bg = CLR_ZINC_800, .border = CLR_ZINC_700},
-      E(HAToggle, HA_LIGHT_2)
-    ),
-    E(Card, {.bg = CLR_ZINC_800, .border = CLR_ZINC_700},
-      E(HAToggle, HA_LIGHT_3)
-    ),
-    E(Card, {.bg = CLR_ZINC_800, .border = CLR_ZINC_700},
-      E(HAToggle, HA_LIGHT_4)
+    E(Card, {},
+      E(Card, {.bg = CLR_ZINC_800, .border = CLR_ZINC_700},
+        E(HAToggle, HA_LIGHT_1)
+      ),
+      E(Card, {.bg = CLR_ZINC_800, .border = CLR_ZINC_700},
+        E(HAToggle, HA_LIGHT_2)
+      ),
+      E(Card, {.bg = CLR_ZINC_800, .border = CLR_ZINC_700},
+        E(HAToggle, HA_LIGHT_3)
+      ),
+      E(Card, {.bg = CLR_ZINC_800, .border = CLR_ZINC_700},
+        E(HAToggle, HA_LIGHT_4)
+      )
     )
   );
 }
@@ -92,12 +94,14 @@ RenderableComponent EcoModeState() {
 
 RenderableComponent ReadyState() {
   return MainLayout(READY,
-    E(Text, {.size = 4}, LV_SYMBOL_HOME " Home"),
-    E(Card, {},
-      E(HAWeather, HA_WEATHER_ENTITY)
-    ),
-    PresenceSection(),
-    LightSection()
+    E(FlexLayout, {.type = LayoutType::Column, .align = Align::Center, .props = {.gap = 12}},
+      E(Text, {.size = 4}, LV_SYMBOL_HOME " Home"),
+      E(Card, {},
+        E(HAWeather, HA_WEATHER_ENTITY)
+      ),
+      PresenceSection(),
+      LightSection()
+    )
   );
 }
 
