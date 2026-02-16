@@ -72,7 +72,8 @@ set(APP_SOURCES
     ../src/application/interface/components/types/Layout.cpp
     ../src/application/interface/components/layout/FlexLayout.cpp
     ../src/application/workflow/Workflow.cpp
-    ../src/application/workflow/ComponentLibrary.cpp
+    ../src/config/screens/Screens.cpp
+    ../src/config/screens/Routes.cpp
     ../src/application/services/HomeAssistant.cpp
     ../src/application/services/OTAUpdate.cpp
     ../src/application/interface/Toast.cpp

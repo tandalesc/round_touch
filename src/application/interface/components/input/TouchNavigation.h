@@ -16,6 +16,8 @@ public:
   TouchNavigation(StateChangeRule rule) : rules{rule} {};
   TouchNavigation(std::initializer_list<StateChangeRule> rules)
       : rules(rules) {};
+  TouchNavigation(std::vector<StateChangeRule> rules)
+      : rules(std::move(rules)) {};
 
   void handleEvent(InputEvent &event) {
     if (event.inputType != InputType::TouchInput) {

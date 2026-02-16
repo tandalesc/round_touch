@@ -1,7 +1,7 @@
 #include "application/Application.h"
 
 #include "application/interface/components/ComponentManager.h"
-#include "application/workflow/ComponentLibrary.h"
+#include "config/screens/Routes.h"
 
 void ComponentManager::createComponent(State state) {
   // if we are already assigned to a component, destroy it first

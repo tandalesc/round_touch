@@ -41,8 +41,8 @@ public:
     if (gesture == "SWIPE UP" || gesture == "SWIPE DOWN" ||
         gesture == "SWIPE LEFT" || gesture == "SWIPE RIGHT") {
       SwipeDirection direction = SwipeDirection::UnknownDirection;
-      if (gesture == "SWIPE UP") direction = SwipeDirection::SwipeDown;
-      else if (gesture == "SWIPE DOWN") direction = SwipeDirection::SwipeUp;
+      if (gesture == "SWIPE UP") direction = SwipeDirection::SwipeUp;
+      else if (gesture == "SWIPE DOWN") direction = SwipeDirection::SwipeDown;
       else if (gesture == "SWIPE LEFT") direction = SwipeDirection::SwipeLeft;
       else if (gesture == "SWIPE RIGHT") direction = SwipeDirection::SwipeRight;
       TouchLocation loc = {pos.first, pos.second};
