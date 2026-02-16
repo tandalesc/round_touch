@@ -2,6 +2,8 @@
 
 Multi-board ESP32-S3 touch display framework with a declarative UI layer built on LVGL. Dashboards are defined as JSON manifests served over the network — edit them in the web UI, and devices pick up changes on next boot.
 
+![Waveshare 7" and MakerFabs Round 1.28" running the same dashboard](docs/hardware-boards.jpg)
+
 ## Supported Boards
 
 | Board | Display | Touch | Resolution |
@@ -110,9 +112,13 @@ No USB required after the first flash — just rebuild and the device picks it u
 
 The web editor at `http://localhost:8080` lets you visually edit device dashboards:
 
-- Select a board, manage screen tabs, build component trees via forms
-- Toggle to raw JSON mode for direct editing
-- Save to write changes — devices load the updated manifest on next boot
+![Dashboard editor with component tree, device preview, and property editor](docs/editor-tree-view.jpg)
+
+- **Component tree** (left) — add, remove, reorder, and nest components
+- **Device preview** (center) — live WYSIWYG preview rendered at native device resolution
+- **Property editor** (right) — edit props, colors, icons, and text per component
+- **Tab manager** (top) — create, rename, reorder, and delete screen tabs
+- **JSON mode** — toggle to raw JSON for direct manifest editing
 
 Per-board manifests live at `server/ui/{board}/screens.json`.
 
