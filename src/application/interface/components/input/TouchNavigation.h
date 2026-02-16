@@ -29,7 +29,21 @@ public:
       bool navigate = false;
       if (tevent.type == TouchType::SwipeType) {
         SwipeTouchEvent &sevent = static_cast<SwipeTouchEvent &>(event);
-        navigate = sevent.direction == rule.direction;
+        if (sevent.direction != rule.direction) continue;
+        // Vertical swipes only navigate when started from edge zones
+        // (top/bottom 15% of screen), like iOS/Android system gestures.
+        // This lets interior swipes scroll content instead.
+        bool isVertical = sevent.direction == SwipeDirection::SwipeUp ||
+                          sevent.direction == SwipeDirection::SwipeDown;
+        if (isVertical && app != nullptr) {
+          int h = app->device()->display().height();
+          int edgeZone = h * 15 / 100;
+          int y = sevent.startLocation.y;
+          bool fromEdge = (y < edgeZone) || (y > h - edgeZone);
+          navigate = fromEdge;
+        } else {
+          navigate = true;
+        }
       } else if (tevent.type == TouchType::TapType) {
         TapTouchEvent &ttevent = static_cast<TapTouchEvent &>(event);
         navigate = rule.region.contains(ttevent.location);

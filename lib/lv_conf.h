@@ -36,7 +36,7 @@
 /* Disable all widgets except label */
 #define LV_USE_ANIMIMG    0
 #define LV_USE_ARC        0
-#define LV_USE_BAR        0
+#define LV_USE_BAR        1
 #define LV_USE_BUTTON     0
 #define LV_USE_BUTTONMATRIX  0
 #define LV_USE_CALENDAR   0
@@ -66,6 +66,17 @@
 #define LV_USE_TABVIEW    0
 #define LV_USE_TILEVIEW   0
 #define LV_USE_WIN        0
+
+/*==================
+ * FONTS
+ *==================*/
+
+/* Enable additional Montserrat sizes (all include FontAwesome symbols).
+ * Montserrat 14 is enabled by default. */
+#define LV_FONT_MONTSERRAT_10 1
+#define LV_FONT_MONTSERRAT_12 1
+#define LV_FONT_MONTSERRAT_18 1
+#define LV_FONT_MONTSERRAT_24 1
 
 /*==================
  * LAYOUTS

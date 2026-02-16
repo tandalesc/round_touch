@@ -35,6 +35,8 @@ HttpResponse ArduinoNetwork::get(const char *url, const char *authHeader) {
   if (!isConnected()) return response;
 
   HTTPClient http;
+  http.setConnectTimeout(3000);
+  http.setTimeout(5000);
   http.begin(url);
   if (authHeader) {
     http.addHeader("Authorization", authHeader);
@@ -55,6 +57,8 @@ HttpResponse ArduinoNetwork::post(const char *url, const char *body,
   if (!isConnected()) return response;
 
   HTTPClient http;
+  http.setConnectTimeout(3000);
+  http.setTimeout(5000);
   http.begin(url);
   http.addHeader("Content-Type", contentType);
   if (authHeader) {

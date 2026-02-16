@@ -9,7 +9,6 @@
 #include "BoardConfig.h"
 #include "device/IDisplay.h"
 #include "esp_lcd_gc9a01.h"
-#include "draw/sw/lv_draw_sw.h"
 
 #define GC9A01_BUF_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT / 10)
 
@@ -20,12 +19,27 @@ private:
   lv_display_t *_disp = nullptr;
   uint16_t *_buf1 = nullptr;
   uint16_t *_buf2 = nullptr;
+  bool _flipped = false; // tracks current 180° state
+
+  void applyRotation(bool flip) {
+    if (_flipped == flip) return;
+    _flipped = flip;
+    // Base orientation: MX=true, MY=false.
+    // 180° rotation: toggle both → MX=false, MY=true.
+    esp_lcd_panel_mirror(_panel, !flip, flip);
+  }
 
   static void flushCb(lv_display_t *disp, const lv_area_t *area, uint8_t *px) {
     auto *self = (GC9A01Display *)lv_display_get_user_data(disp);
+
+    // Use hardware MADCTL mirror for 180° rotation — no software pixel
+    // manipulation needed, eliminating the rotation buffer and artifacts.
+    bool flip = lv_display_get_rotation(disp) == LV_DISPLAY_ROTATION_180;
+    self->applyRotation(flip);
+
     // Byte-swap RGB565 for SPI big-endian
     uint16_t *p = (uint16_t *)px;
-    uint32_t num_px = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1);
+    uint32_t num_px = lv_area_get_width(area) * lv_area_get_height(area);
     for (uint32_t i = 0; i < num_px; i++) {
       p[i] = (p[i] >> 8) | (p[i] << 8);
     }
@@ -97,6 +111,7 @@ public:
 
   int width() override { return SCREEN_WIDTH; }
   int height() override { return SCREEN_HEIGHT; }
+  bool isCircular() override { return true; }
 };
 
 #endif // _GC9A01_DISPLAY_H_

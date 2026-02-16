@@ -30,6 +30,37 @@ String HomeAssistant::getEntityState(const char *entityId) {
   return String(doc["state"].as<const char *>());
 }
 
+String HomeAssistant::getEntityAttribute(const char *entityId,
+                                         const char *attrKey) {
+  String url = String(_baseUrl) + "/api/states/" + entityId;
+  HttpResponse resp = _network->get(url.c_str(), _authHeader.c_str());
+
+  if (resp.statusCode != 200) {
+    Serial.printf("[HA] GET attr failed: %d\n", resp.statusCode);
+    return "";
+  }
+
+  JsonDocument doc;
+  DeserializationError err = deserializeJson(doc, resp.body);
+  if (err) {
+    Serial.printf("[HA] JSON parse error: %s\n", err.c_str());
+    return "";
+  }
+
+  JsonVariant attr = doc["attributes"][attrKey];
+  if (attr.isNull()) return "";
+
+  // Return numeric values as strings too
+  if (attr.is<const char *>()) return String(attr.as<const char *>());
+  if (attr.is<float>()) {
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%.1f", attr.as<float>());
+    return String(buf);
+  }
+  if (attr.is<int>()) return String(attr.as<int>());
+  return "";
+}
+
 static bool callService(INetwork *network, const char *baseUrl,
                         const char *authHeader, const char *domain,
                         const char *service, const char *entityId) {

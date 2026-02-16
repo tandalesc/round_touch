@@ -74,6 +74,8 @@ set(APP_SOURCES
     ../src/application/workflow/Workflow.cpp
     ../src/application/workflow/ComponentLibrary.cpp
     ../src/application/services/HomeAssistant.cpp
+    ../src/application/services/OTAUpdate.cpp
+    ../src/application/interface/Toast.cpp
     ../src/device/Device.cpp
 )
 

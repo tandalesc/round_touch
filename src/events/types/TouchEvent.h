@@ -57,9 +57,13 @@ public:
 class SwipeTouchEvent : public TouchEvent {
 public:
   SwipeDirection direction;
+  TouchLocation startLocation = {};
 
   SwipeTouchEvent(SwipeDirection direction)
       : TouchEvent(TouchType::SwipeType), direction(direction) {};
+  SwipeTouchEvent(SwipeDirection direction, TouchLocation startLocation)
+      : TouchEvent(TouchType::SwipeType), direction(direction),
+        startLocation(startLocation) {};
 
   virtual void debug() override {
     Serial.print("SwipeTouchEvent: Received swipe ");
@@ -72,7 +76,11 @@ public:
     } else if (direction == SwipeDirection::SwipeRight) {
       Serial.print("right ");
     }
-    Serial.println("event.");
+    Serial.print(" from (");
+    Serial.print(startLocation.x);
+    Serial.print(", ");
+    Serial.print(startLocation.y);
+    Serial.println(").");
   }
 };
 

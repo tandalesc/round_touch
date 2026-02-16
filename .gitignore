@@ -6,3 +6,4 @@ build
 .python-version
 .DS_Store
 src/config/NetworkConfig.h
+src/config/HAConfig.h
