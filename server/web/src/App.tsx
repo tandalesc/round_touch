@@ -7,6 +7,7 @@ import TabManager from "./components/TabManager";
 import ComponentTree from "./components/ComponentTree";
 import PropEditor from "./components/PropEditor";
 import RawJsonEditor from "./components/RawJsonEditor";
+import DevicePreview from "./components/DevicePreview";
 
 export default function App() {
   const m = useManifest();
@@ -110,6 +111,16 @@ export default function App() {
               )}
             </div>
             <div className="panel panel-right">
+              {screenRoot && (
+                <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+                  <DevicePreview
+                    root={screenRoot}
+                    selectedPath={m.selectedPath}
+                    onSelect={m.selectNode}
+                    boardName={m.selectedBoard}
+                  />
+                </div>
+              )}
               {selectedNode && schema ? (
                 <PropEditor
                   node={selectedNode}
