@@ -25,6 +25,9 @@ public:
   TabBar(State activeState, std::initializer_list<TabBarItem> items)
       : items(items), activeState(activeState) {};
 
+  TabBar(State activeState, std::vector<TabBarItem> items)
+      : items(std::move(items)), activeState(activeState) {};
+
   void createWidgets(lv_obj_t *parent) override {
     int screenW = (app != nullptr) ? app->device()->display().width() : 240;
     bool useTabs = screenW >= 480;

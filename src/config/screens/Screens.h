@@ -4,14 +4,12 @@
 #include "application/interface/components/types/Component.h"
 #include "application/workflow/Workflow.h"
 
+// System screens (always compiled)
 RenderableComponent DeviceNotStarted();
 RenderableComponent ErrorState();
-RenderableComponent ReadyState();
-RenderableComponent EcoModeState();
-RenderableComponent Info1State();
-RenderableComponent Info2State();
-RenderableComponent Info3State();
-RenderableComponent DetailsState();
-RenderableComponent LightsState();
+RenderableComponent SystemShadeState();
+
+// Fallback for user screens when no JSON manifest is loaded
+RenderableComponent userScreenFallback(State state);
 
 #endif // _SCREENS_H_

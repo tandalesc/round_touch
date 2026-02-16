@@ -30,8 +30,9 @@ void Application::init() {
     _ota = new OTAUpdate(&device()->network(), OTA_UPDATE_URL, OTA_SECRET_KEY);
     Serial.println("OTA update service initialized.");
   }
-  // kick start application by navigating to first state
-  workflow().navigate(READY);
+  // kick start application by navigating to first user screen
+  // (will be replaced with manifest default_screen once JSON pipeline is wired)
+  workflow().navigate(USER_STATE_BASE);
   // check for firmware updates on boot and show toast if available
   if (_ota != nullptr && _ota->checkForUpdate()) {
     char msg[64];
@@ -41,7 +42,7 @@ void Application::init() {
       .label = "Update",
       .callback = [](void *ctx) {
         auto *self = static_cast<Application *>(ctx);
-        self->workflow().navigate(INFO3);
+        self->workflow().navigate(SYSTEM_SHADE);
       },
       .userData = this,
     });

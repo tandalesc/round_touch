@@ -14,7 +14,7 @@ void ComponentManager::createComponent(State state) {
   lv_obj_remove_style_all(screen);
 
   // create the component tree from the declarative DSL
-  active = createComponentFromState(state);
+  active = createComponentFromState(state, app);
   active->attachApplication(app);
   // build the LVGL widget tree on the screen
   active->createWidgets(screen);
