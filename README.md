@@ -64,9 +64,9 @@ The server handles OTA firmware updates and serves UI manifests to devices. It a
 
 ```bash
 cd server
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 cd web && npm install && npm run build && cd ..
-python ota_server.py --config server.toml
+uv run python ota_server.py --config server.toml
 ```
 
 Open `http://localhost:8080` to access the dashboard editor.
@@ -77,7 +77,7 @@ For frontend development with hot reload:
 
 ```bash
 # Terminal 1 — Backend
-cd server && python ota_server.py --config server.toml
+cd server && uv run python ota_server.py --config server.toml
 
 # Terminal 2 — Frontend dev server
 cd server/web && npm run dev
