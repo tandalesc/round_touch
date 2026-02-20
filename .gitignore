@@ -11,6 +11,8 @@ server/server.toml
 server/web/node_modules
 server/web/dist
 server/*.db
+server/*.db-shm
+server/*.db-wal
 server/storage/
 server/__pycache__/
 server/app/__pycache__/
