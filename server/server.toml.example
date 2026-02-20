@@ -1,0 +1,42 @@
+# round_touch Server Configuration
+# Copy to server.toml and fill in your values:
+#   cp server.toml.example server.toml
+
+# Path to PlatformIO build output (contains board subdirectories with firmware.bin)
+firmware_dir = "../.pio/build"
+
+# Pre-shared key for HMAC-SHA256 binary signing (must match OTA_SECRET_KEY on devices)
+secret_key = "change-me-to-a-real-secret"
+
+# Current firmware version (must be newer than device version to trigger update)
+version = "0.0.1"
+
+# Directory containing per-board UI manifests (for initial import only)
+ui_dir = "ui"
+
+# Listen port
+port = 8080
+
+# SQLite database path
+db_path = "round_touch.db"
+
+# Local file storage root (firmware binaries)
+storage_dir = "storage"
+
+# Home Assistant integration
+[homeassistant]
+url = "http://homeassistant.local:8123"
+token = "your-long-lived-access-token"
+
+# LLM endpoints (OpenAI-compatible)
+# Each model entry needs a url (base URL) and model_id (the model name the endpoint expects)
+[llm]
+default_model = "qwen3-8b"
+
+[llm.models.qwen3-8b]
+url = "http://localhost:8001/v1/"
+model_id = "your-model-id"
+
+[llm.models.qwen3-30b]
+url = "http://localhost:8003/v1/"
+model_id = "your-model-id"

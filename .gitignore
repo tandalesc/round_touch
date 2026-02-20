@@ -7,6 +7,12 @@ build
 .DS_Store
 src/config/NetworkConfig.h
 src/config/HAConfig.h
+server/server.toml
 server/web/node_modules
 server/web/dist
+server/*.db
+server/storage/
+server/__pycache__/
+server/app/__pycache__/
+server/app/**/__pycache__/
 *.bak

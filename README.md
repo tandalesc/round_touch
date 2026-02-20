@@ -38,11 +38,15 @@ git submodule update --init --recursive
 Copy the config templates and fill in your values:
 
 ```bash
+# Device firmware config
 cp src/config/NetworkConfig.h.example src/config/NetworkConfig.h
 cp src/config/HAConfig.h.example src/config/HAConfig.h
+
+# Server config
+cp server/server.toml.example server/server.toml
 ```
 
-Edit `NetworkConfig.h` with your WiFi credentials and server URL. Edit `HAConfig.h` with your Home Assistant entity IDs.
+Edit `NetworkConfig.h` with your WiFi credentials and server URL. Edit `HAConfig.h` with your Home Assistant entity IDs. Edit `server.toml` with your HA token, LLM endpoints, and secret key.
 
 ## First Flash (USB)
 
@@ -60,16 +64,30 @@ After the initial flash, the device supports OTA updates and can be managed enti
 
 ## Running the Server
 
-The server handles OTA firmware updates and serves UI manifests to devices. It also hosts the web-based dashboard editor.
+The server handles OTA firmware updates, serves UI manifests, resolves dynamic content (templates + LLM), and hosts the web-based dashboard editor. Data is persisted in SQLite.
 
 ```bash
 cd server
+cp server.toml.example server.toml   # then edit with your values
 uv pip install -r requirements.txt
 cd web && npm install && npm run build && cd ..
-uv run python ota_server.py --config server.toml
+uv run python main.py --config server.toml
 ```
 
 Open `http://localhost:8080` to access the dashboard editor.
+
+On first run, the server auto-imports existing JSON manifests from `ui/` and firmware binaries from the PlatformIO build directory into SQLite.
+
+### Server Configuration
+
+`server.toml` holds all server config (copy from `server.toml.example`):
+
+| Section | Purpose |
+|---------|---------|
+| Top-level | Firmware dir, secret key, version, port, DB path |
+| `[homeassistant]` | HA URL + long-lived access token for data source resolution |
+| `[llm]` | Default model key |
+| `[llm.models.<key>]` | Per-model `url` (OpenAI-compatible base) and `model_id` (as reported by the endpoint) |
 
 ### Development Mode
 
@@ -77,7 +95,7 @@ For frontend development with hot reload:
 
 ```bash
 # Terminal 1 — Backend
-cd server && uv run python ota_server.py --config server.toml
+cd server && uv run python main.py --config server.toml
 
 # Terminal 2 — Frontend dev server
 cd server/web && npm run dev
@@ -92,11 +110,11 @@ cd server
 docker build -t round-touch-server .
 docker run -p 8080:8080 \
   -v $(pwd)/ui:/app/ui \
-  -v $(pwd)/../.pio/build:/app/firmware \
+  -v $(pwd)/storage:/app/storage \
   round-touch-server
 ```
 
-The `ui/` volume persists dashboard manifests. The `firmware/` volume provides binaries for OTA.
+The `ui/` volume provides manifests for initial import. The `storage/` volume persists firmware binaries.
 
 ### OTA Updates
 
@@ -107,6 +125,48 @@ Once the server is running, subsequent firmware updates go over the network:
 3. Devices check for updates on boot and can be triggered from the System Shade (swipe down)
 
 No USB required after the first flash — just rebuild and the device picks it up.
+
+## Dynamic Content
+
+Two component types enable server-rendered content on device screens:
+
+### DynamicText
+
+Resolves `{{prefix:key}}` template placeholders server-side with no LLM involved. Devices poll on a TTL interval using ETag-based conditional requests (304 Not Modified when unchanged).
+
+**Data sources:**
+
+| Prefix | Description | Examples |
+|--------|-------------|---------|
+| `ha:` | Home Assistant entity state/attributes | `ha:weather.forecast_home`, `ha:sensor.temperature.state` |
+| `time:` | Current date/time | `time:now`, `time:date`, `time:time`, `time:weekday` |
+
+HA entities support dot-notation for attributes: `ha:weather.forecast_home.temperature` returns just the temperature attribute value.
+
+### LLMText
+
+Like DynamicText, but after template resolution the result is sent to a local LLM (OpenAI-compatible endpoint) and the response is displayed. Responses are cached with a configurable TTL. Error responses are never cached so the next poll retries.
+
+### Data Source Explorer API
+
+Useful for authoring templates:
+
+```bash
+# Test template resolution
+curl "http://localhost:8080/api/datasources/resolve?template={{ha:weather.forecast_home.temperature}}F,+{{time:now}}"
+
+# Browse all HA entities
+curl http://localhost:8080/api/datasources/ha/entities
+
+# Filter by domain
+curl "http://localhost:8080/api/datasources/ha/entities?domain=sensor"
+
+# Search by name
+curl "http://localhost:8080/api/datasources/ha/entities?q=temperature"
+
+# Full entity detail with copy-pasteable template refs
+curl http://localhost:8080/api/datasources/ha/entity/weather.forecast_home
+```
 
 ## Dashboard Editor
 
@@ -150,10 +210,19 @@ Application(&device)
     ComponentRegistry           Maps type names to factory functions
     UserScreenManager           Parses JSON manifests, builds component trees on demand
 
-Server
-  ota_server.py                 FastAPI: OTA firmware + UI manifests + editor API
+Server (server/)
+  main.py                       Entrypoint — loads config, starts FastAPI via uvicorn
+  app/                          FastAPI application package
+    routes/device.py            Device API: version check, firmware download, UI manifests
+    routes/editor.py            Editor API: board/manifest CRUD, component schema
+    routes/dynamic.py           Dynamic content: DynamicText + LLMText resolution
+    routes/datasources.py       Data source explorer: template testing, HA entity browser
+    services/datasources.py     Pluggable data sources (ha:, time:) with template engine
+    services/llm.py             OpenAI-compatible LLM client
+    database.py                 SQLite schema, queries, auto-import migration
+    config.py                   TOML config loading
   web/                          React SPA dashboard editor
-  ui/{board}/screens.json       Per-board JSON manifests
+  ui/{board}/screens.json       Per-board JSON manifests (imported on first run)
 ```
 
 ### Declarative UI

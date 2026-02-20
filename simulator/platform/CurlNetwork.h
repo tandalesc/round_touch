@@ -8,7 +8,8 @@ public:
   void init() override;
   bool isConnected() override;
   HttpResponse get(const char *url,
-                   const char *authHeader = nullptr) override;
+                   const char *authHeader = nullptr,
+                   const char *ifNoneMatch = nullptr) override;
   HttpResponse post(const char *url, const char *body,
                     const char *contentType = "application/json",
                     const char *authHeader = nullptr) override;

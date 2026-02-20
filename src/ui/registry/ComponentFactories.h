@@ -14,6 +14,8 @@
 #include "application/interface/components/ha/HABinarySensor.h"
 #include "config/screens/GaugeCard.h"
 #include "config/screens/TitledCard.h"
+#include "application/interface/components/dynamic/DynamicText.h"
+#include "application/interface/components/dynamic/LLMText.h"
 
 // ---------------------------------------------------------------------------
 // Factory functions — one per registerable component
@@ -144,6 +146,26 @@ static Component *createHABinarySensor(const JsonObject &node,
   return new HABinarySensor(entity, label);
 }
 
+static Component *createDynamicText(const JsonObject &node,
+                                     std::vector<Component *> children) {
+  const char *contentKey = node["content_key"] | "";
+  JsonObject props = node["props"];
+  int ttl        = props ? (props["ttl"]   | 60)      : 60;
+  uint8_t size   = props ? (props["size"]  | 3)       : 3;
+  uint32_t color = props ? (props["color"] | (int)0xFAFAFA) : 0xFAFAFA;
+  return new DynamicText(contentKey, ttl, size, color);
+}
+
+static Component *createLLMText(const JsonObject &node,
+                                 std::vector<Component *> children) {
+  const char *contentKey = node["content_key"] | "";
+  JsonObject props = node["props"];
+  int ttl        = props ? (props["ttl"]   | 300)     : 300;
+  uint8_t size   = props ? (props["size"]  | 3)       : 3;
+  uint32_t color = props ? (props["color"] | (int)0xFAFAFA) : 0xFAFAFA;
+  return new LLMText(contentKey, ttl, size, color);
+}
+
 // ---------------------------------------------------------------------------
 // Registration — call once at boot
 // ---------------------------------------------------------------------------
@@ -161,6 +183,9 @@ static void registerAllComponents(ComponentRegistry &registry) {
   registry.reg("HAToggle",        createHAToggle);
   registry.reg("HAWeather",       createHAWeather);
   registry.reg("HABinarySensor",  createHABinarySensor);
+  // Tier 3 — dynamic server content
+  registry.reg("DynamicText",     createDynamicText);
+  registry.reg("LLMText",         createLLMText);
 }
 
 #endif // _COMPONENT_FACTORIES_H_

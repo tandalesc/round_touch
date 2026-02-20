@@ -10,6 +10,22 @@ static size_t writeCallback(char *ptr, size_t size, size_t nmemb, void *userdata
   return size * nmemb;
 }
 
+static size_t headerCallback(char *buffer, size_t size, size_t nitems, void *userdata) {
+  std::string *etag = static_cast<std::string *>(userdata);
+  std::string line(buffer, size * nitems);
+  // Look for ETag header (case-insensitive)
+  if (line.size() > 5 && (line.substr(0, 5) == "ETag:" || line.substr(0, 5) == "etag:")) {
+    std::string val = line.substr(5);
+    // Trim whitespace and quotes
+    size_t start = val.find_first_not_of(" \t\"");
+    size_t end = val.find_last_not_of(" \t\r\n\"");
+    if (start != std::string::npos && end != std::string::npos) {
+      *etag = val.substr(start, end - start + 1);
+    }
+  }
+  return size * nitems;
+}
+
 void CurlNetwork::init() {
   curl_global_init(CURL_GLOBAL_DEFAULT);
   printf("[CurlNetwork] Initialized (desktop HTTP via libcurl)\n");
@@ -19,21 +35,29 @@ bool CurlNetwork::isConnected() {
   return true;
 }
 
-HttpResponse CurlNetwork::get(const char *url, const char *authHeader) {
+HttpResponse CurlNetwork::get(const char *url, const char *authHeader,
+                               const char *ifNoneMatch) {
   HttpResponse response;
   CURL *curl = curl_easy_init();
   if (!curl) return response;
 
   std::string responseBody;
+  std::string etagValue;
   struct curl_slist *headers = nullptr;
   if (authHeader) {
     std::string hdr = std::string("Authorization: ") + authHeader;
+    headers = curl_slist_append(headers, hdr.c_str());
+  }
+  if (ifNoneMatch) {
+    std::string hdr = std::string("If-None-Match: ") + ifNoneMatch;
     headers = curl_slist_append(headers, hdr.c_str());
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseBody);
+  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, headerCallback);
+  curl_easy_setopt(curl, CURLOPT_HEADERDATA, &etagValue);
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
   if (headers) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -44,7 +68,12 @@ HttpResponse CurlNetwork::get(const char *url, const char *authHeader) {
     long httpCode = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
     response.statusCode = (int)httpCode;
-    response.body = String(responseBody.c_str());
+    if (httpCode != 304) {
+      response.body = String(responseBody.c_str());
+    }
+    if (!etagValue.empty()) {
+      response.etag = String(etagValue.c_str());
+    }
   } else {
     printf("[CurlNetwork] GET failed: %s\n", curl_easy_strerror(res));
   }

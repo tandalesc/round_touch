@@ -30,7 +30,8 @@ bool ArduinoNetwork::isConnected() {
   return WiFi.status() == WL_CONNECTED;
 }
 
-HttpResponse ArduinoNetwork::get(const char *url, const char *authHeader) {
+HttpResponse ArduinoNetwork::get(const char *url, const char *authHeader,
+                                 const char *ifNoneMatch) {
   HttpResponse response;
   if (!isConnected()) return response;
 
@@ -38,13 +39,23 @@ HttpResponse ArduinoNetwork::get(const char *url, const char *authHeader) {
   http.setConnectTimeout(3000);
   http.setTimeout(5000);
   http.begin(url);
+  const char *collectHdrs[] = {"ETag"};
+  http.collectHeaders(collectHdrs, 1);
   if (authHeader) {
     http.addHeader("Authorization", authHeader);
+  }
+  if (ifNoneMatch) {
+    http.addHeader("If-None-Match", ifNoneMatch);
   }
 
   response.statusCode = http.GET();
   if (response.statusCode > 0) {
-    response.body = http.getString();
+    if (response.statusCode != 304) {
+      response.body = http.getString();
+    }
+    if (http.hasHeader("ETag")) {
+      response.etag = http.header("ETag");
+    }
   }
   http.end();
   return response;
