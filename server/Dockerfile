@@ -11,12 +11,13 @@ FROM python:3.13-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY ota_server.py server.toml ./
+COPY main.py server.toml ./
+COPY app/ ./app/
 COPY --from=frontend /app/web/dist ./web/dist/
 
-# UI manifests and firmware are mounted as volumes
+# UI manifests (for initial import), firmware, and storage are mounted as volumes
 VOLUME /app/ui
-VOLUME /app/firmware
+VOLUME /app/storage
 
 EXPOSE 8080
-CMD ["python", "ota_server.py", "--config", "server.toml"]
+CMD ["python", "main.py", "--config", "server.toml"]

@@ -6,6 +6,7 @@
 struct HttpResponse {
   int statusCode = -1;
   String body;
+  String etag;
 };
 
 class INetwork {
@@ -14,7 +15,8 @@ public:
   virtual void init() = 0;
   virtual bool isConnected() = 0;
   virtual HttpResponse get(const char *url,
-                           const char *authHeader = nullptr) = 0;
+                           const char *authHeader = nullptr,
+                           const char *ifNoneMatch = nullptr) = 0;
   virtual HttpResponse post(const char *url, const char *body,
                             const char *contentType = "application/json",
                             const char *authHeader = nullptr) = 0;
