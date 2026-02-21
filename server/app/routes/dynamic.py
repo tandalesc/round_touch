@@ -87,6 +87,12 @@ def create_router(db: Database, datasources: DataSourceRegistry,
             headers={"ETag": f'"{etag}"'},
         )
 
+    @router.post("/refresh")
+    async def refresh_content():
+        """Invalidate all cached dynamic content, forcing fresh resolution on next request."""
+        await db.invalidate_all_cached_content()
+        return {"status": "ok"}
+
     return router
 
 

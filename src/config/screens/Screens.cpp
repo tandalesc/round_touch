@@ -11,6 +11,7 @@
 #include "application/interface/components/core/Text.h"
 #include "application/interface/components/settings/OTAUpdatePanel.h"
 #include "application/interface/components/settings/DisplayInfoPanel.h"
+#include "application/interface/components/settings/ContentRefreshPanel.h"
 #include "application/interface/components/settings/RotationToggle.h"
 
 // ---------------------------------------------------------------------------
@@ -48,6 +49,9 @@ RenderableComponent SystemShadeState() {
         ),
         E(TitledCard, {.icon = LV_SYMBOL_WIFI, .title = "WiFi"},
           E(Text, {.color = CLR_GREEN}, "Connected")
+        ),
+        E(Card, {},
+          E(ContentRefreshPanel)
         ),
         E(Card, {},
           E(DisplayInfoPanel),

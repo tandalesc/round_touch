@@ -270,6 +270,14 @@ class Database:
                 "expired": datetime.now(timezone.utc) > expires_at,
             }
 
+    async def invalidate_all_cached_content(self):
+        """Expire all cached dynamic content so the next request triggers a fresh resolve."""
+        await self.db.execute(
+            "UPDATE dynamic_content SET expires_at = ?",
+            (datetime.now(timezone.utc).isoformat(),),
+        )
+        await self.db.commit()
+
     async def set_cached_content(self, content_key: str, text: str,
                                  etag: str, ttl_seconds: int):
         expires_at = datetime.now(timezone.utc).isoformat()
