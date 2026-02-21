@@ -10,7 +10,6 @@ export default function IconPicker({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -34,11 +33,15 @@ export default function IconPicker({ value, onChange }: Props) {
           placeholder="Icon character"
           style={{ flex: 1 }}
         />
-        <button className="small" onClick={() => setOpen(!open)}>
+        <button
+          className="icon-btn"
+          onClick={() => setOpen(!open)}
+          style={{ width: 32, height: 32, border: "1px solid var(--border-default)" }}
+        >
           {currentSymbol ? (
-            <span className="tab-icon">{currentSymbol.code}</span>
+            <span className="tab-icon" style={{ fontSize: 14 }}>{currentSymbol.code}</span>
           ) : (
-            "Pick"
+            <i className="fa fa-th" />
           )}
         </button>
       </div>

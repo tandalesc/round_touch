@@ -25,7 +25,7 @@ function PreviewNode({
     path.length === selectedPath.length &&
     path.every((v, i) => v === selectedPath[i]);
 
-  const outline = isSelected ? "2px solid #3b82f6" : "2px solid transparent";
+  const outline = isSelected ? "2px solid #E8893C" : "2px solid transparent";
 
   const renderChildren = () =>
     node.children?.map((child, i) => (
@@ -153,7 +153,6 @@ function PreviewNode({
     }
 
     case "Text": {
-      // Firmware sizes: 1=10pt, 2=12pt, 3=14pt, 4=18pt, 5=24pt
       const SIZES: Record<number, number> = { 1: 10, 2: 12, 3: 14, 4: 18, 5: 24 };
       const size = SIZES[Number(node.props?.size ?? 3)] ?? 14;
       return (
@@ -292,7 +291,6 @@ export default function DevicePreview({ root, selectedPath, onSelect, boardName 
   const isRound = boardName?.includes("makerfabs") || boardName?.includes("round");
   const isLarge = boardName?.includes("waveshare") || boardName?.includes("7");
 
-  // Render at native device resolution, then CSS scale down to fit
   const nativeW = isLarge ? 800 : 240;
   const nativeH = isLarge ? 480 : 240;
   const displayW = isLarge ? 280 : 160;
@@ -300,17 +298,13 @@ export default function DevicePreview({ root, selectedPath, onSelect, boardName 
   const displayH = nativeH * scale;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-      <div style={{ fontSize: 11, color: "#71717a" }}>Preview</div>
+    <div className="device-preview-wrapper">
+      <span className="device-preview-label">Preview</span>
       <div
+        className={`device-frame ${isRound ? "round" : "rect"}`}
         style={{
           width: displayW,
           height: displayH,
-          borderRadius: isRound ? "50%" : 8,
-          overflow: "hidden",
-          border: "2px solid #3f3f46",
-          background: "#09090b",
-          flexShrink: 0,
         }}
       >
         <div
