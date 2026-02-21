@@ -21,43 +21,60 @@ export default function Header({
 }: Props) {
   return (
     <div className="header">
-      <span className="header-title">round_touch</span>
+      <div className="header-brand">
+        <span className="header-logo" />
+        <span className="header-title">round_touch</span>
+      </div>
 
-      <select
-        value={selectedBoard ?? ""}
-        onChange={(e) => e.target.value && onSelectBoard(e.target.value)}
-      >
-        <option value="">Select board...</option>
-        {boards.map((b) => (
-          <option key={b.name} value={b.name}>
-            {b.name} ({b.screenCount} screens)
-          </option>
-        ))}
-      </select>
+      <div className="header-divider" />
+
+      <div className="board-select-wrapper">
+        <i className="fa fa-microchip" />
+        <select
+          className="board-select"
+          value={selectedBoard ?? ""}
+          onChange={(e) => e.target.value && onSelectBoard(e.target.value)}
+        >
+          <option value="">Select board...</option>
+          {boards.map((b) => (
+            <option key={b.name} value={b.name}>
+              {b.name} ({b.screenCount})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="header-spacer" />
 
       {selectedBoard && (
         <>
-          <button
-            className={mode === "tree" ? "active" : ""}
-            onClick={mode !== "tree" ? onToggleMode : undefined}
-          >
-            Tree
-          </button>
-          <button
-            className={mode === "json" ? "active" : ""}
-            onClick={mode !== "json" ? onToggleMode : undefined}
-          >
-            JSON
-          </button>
+          <div className="mode-toggle">
+            <button
+              className={`mode-toggle-btn${mode === "tree" ? " active" : ""}`}
+              onClick={mode !== "tree" ? onToggleMode : undefined}
+            >
+              <i className="fa fa-sitemap" style={{ fontSize: 10 }} />
+              Tree
+            </button>
+            <button
+              className={`mode-toggle-btn${mode === "json" ? " active" : ""}`}
+              onClick={mode !== "json" ? onToggleMode : undefined}
+            >
+              <i className="fa fa-code" style={{ fontSize: 10 }} />
+              JSON
+            </button>
+          </div>
+
+          {isDirty && <span className="dirty-dot" title="Unsaved changes" />}
 
           <button
-            className="primary"
+            className="save-btn"
             onClick={onSave}
             disabled={saving || !isDirty}
           >
+            <i className="fa fa-save" />
             {saving ? "Saving..." : "Save"}
           </button>
-          {isDirty && <span className="dirty-dot" title="Unsaved changes" />}
         </>
       )}
     </div>

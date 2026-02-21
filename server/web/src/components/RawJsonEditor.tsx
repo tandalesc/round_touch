@@ -11,7 +11,6 @@ export default function RawJsonEditor({ manifest, onApply }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [localDirty, setLocalDirty] = useState(false);
 
-  // Sync from manifest when it changes externally
   useEffect(() => {
     setText(JSON.stringify(manifest, null, 2));
     setError(null);
@@ -21,7 +20,6 @@ export default function RawJsonEditor({ manifest, onApply }: Props) {
   const handleApply = () => {
     try {
       const parsed = JSON.parse(text);
-      // Basic structural check
       if (!parsed.version || !parsed.tabs || !parsed.screens) {
         setError("Missing required keys: version, tabs, screens");
         return;
@@ -56,15 +54,24 @@ export default function RawJsonEditor({ manifest, onApply }: Props) {
         spellCheck={false}
       />
       <div className="json-editor-actions">
-        <button onClick={handleFormat}>Format</button>
+        <button onClick={handleFormat}>
+          <i className="fa fa-indent" style={{ fontSize: 11 }} />
+          Format
+        </button>
         <button
           className="primary"
           onClick={handleApply}
           disabled={!localDirty}
         >
+          <i className="fa fa-check" style={{ fontSize: 11 }} />
           Apply to Editor
         </button>
-        {error && <span className="json-editor-error">{error}</span>}
+        {error && (
+          <span className="json-editor-error">
+            <i className="fa fa-exclamation-triangle" />
+            {error}
+          </span>
+        )}
       </div>
     </div>
   );

@@ -66,12 +66,15 @@ export default function TabManager({
                 onClick={(e) => e.stopPropagation()}
                 style={{
                   width: "80px",
-                  background: "var(--bg)",
+                  background: "var(--bg-input)",
                   border: "1px solid var(--accent)",
-                  borderRadius: "3px",
-                  color: "var(--text)",
-                  padding: "1px 4px",
-                  fontSize: "13px",
+                  borderRadius: "var(--radius-sm)",
+                  color: "var(--text-primary)",
+                  padding: "1px 6px",
+                  fontSize: "12px",
+                  fontFamily: "var(--font-sans)",
+                  outline: "none",
+                  boxShadow: "0 0 0 2px var(--accent-subtle)",
                 }}
               />
             ) : (
@@ -81,32 +84,32 @@ export default function TabManager({
             {isActive && (
               <div className="tab-actions" onClick={(e) => e.stopPropagation()}>
                 {i > 0 && (
-                  <button className="small" onClick={() => onReorder(i, i - 1)} title="Move left">
-                    &lt;
+                  <button className="icon-btn" onClick={() => onReorder(i, i - 1)} title="Move left">
+                    <i className="fa fa-chevron-left" />
                   </button>
                 )}
                 {i < tabs.length - 1 && (
-                  <button className="small" onClick={() => onReorder(i, i + 1)} title="Move right">
-                    &gt;
+                  <button className="icon-btn" onClick={() => onReorder(i, i + 1)} title="Move right">
+                    <i className="fa fa-chevron-right" />
                   </button>
                 )}
-                <button className="small" onClick={() => startEdit(tab)} title="Rename">
-                  ~
+                <button className="icon-btn" onClick={() => startEdit(tab)} title="Rename">
+                  <i className="fa fa-pencil" />
                 </button>
                 {!isDefault && (
-                  <button className="small" onClick={() => onSetDefault(tab.id)} title="Set as default">
-                    *
+                  <button className="icon-btn" onClick={() => onSetDefault(tab.id)} title="Set as default">
+                    <i className="fa fa-star-o" />
                   </button>
                 )}
                 {tabs.length > 1 && (
                   <button
-                    className="small danger"
+                    className="icon-btn danger"
                     onClick={() => {
                       if (confirm(`Delete tab "${tab.label}"?`)) onRemove(tab.id);
                     }}
                     title="Delete tab"
                   >
-                    x
+                    <i className="fa fa-trash-o" />
                   </button>
                 )}
               </div>
@@ -116,11 +119,11 @@ export default function TabManager({
       })}
 
       <button
-        className="small"
+        className="tab-add-btn"
         onClick={() => onAdd("\uF015", "New")}
         title="Add tab"
       >
-        +
+        <i className="fa fa-plus" />
       </button>
     </div>
   );

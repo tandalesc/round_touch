@@ -6,7 +6,6 @@ interface Props {
 }
 
 function hexToNative(hex: string): string {
-  // "0xRRGGBB" -> "#RRGGBB"
   if (hex.startsWith("0x") || hex.startsWith("0X")) {
     return "#" + hex.slice(2).padStart(6, "0");
   }
@@ -14,7 +13,6 @@ function hexToNative(hex: string): string {
 }
 
 function nativeToHex(native: string): string {
-  // "#RRGGBB" -> "0xRRGGBB"
   return "0x" + native.slice(1).toUpperCase();
 }
 

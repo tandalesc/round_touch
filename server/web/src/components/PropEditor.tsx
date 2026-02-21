@@ -104,8 +104,11 @@ export default function PropEditor({
   if (!cs) {
     return (
       <div className="prop-editor">
-        <h3>{node.type}</h3>
-        <div style={{ color: "var(--text-dim)" }}>Unknown component type</div>
+        <div className="prop-editor-title">
+          <i className="fa fa-cube" />
+          {node.type}
+        </div>
+        <div className="prop-no-props">Unknown component type</div>
       </div>
     );
   }
@@ -115,7 +118,10 @@ export default function PropEditor({
 
   return (
     <div className="prop-editor">
-      <h3>{node.type}</h3>
+      <div className="prop-editor-title">
+        <i className="fa fa-cube" />
+        {node.type}
+      </div>
 
       {fieldEntries.length > 0 && (
         <>
@@ -146,7 +152,7 @@ export default function PropEditor({
       )}
 
       {fieldEntries.length === 0 && propEntries.length === 0 && (
-        <div style={{ color: "var(--text-dim)" }}>No editable properties</div>
+        <div className="prop-no-props">No editable properties</div>
       )}
     </div>
   );

@@ -70,34 +70,34 @@ export default function TreeNode({
         <div className="tree-node-actions">
           {!isRoot && index > 0 && (
             <button
-              className="small"
+              className="icon-btn"
               onClick={(e) => { e.stopPropagation(); onMove(path, "up"); }}
               title="Move up"
             >
-              &#9650;
+              <i className="fa fa-arrow-up" />
             </button>
           )}
           {!isRoot && index < siblingCount - 1 && (
             <button
-              className="small"
+              className="icon-btn"
               onClick={(e) => { e.stopPropagation(); onMove(path, "down"); }}
               title="Move down"
             >
-              &#9660;
+              <i className="fa fa-arrow-down" />
             </button>
           )}
           {canHaveChildren && (
             <button
-              className="small"
+              className="icon-btn"
               onClick={(e) => { e.stopPropagation(); onAddChild(path); }}
               title="Add child"
             >
-              +
+              <i className="fa fa-plus" />
             </button>
           )}
           {!isRoot && (
             <button
-              className="small danger"
+              className="icon-btn danger"
               onClick={(e) => {
                 e.stopPropagation();
                 const childCount = node.children?.length ?? 0;
@@ -106,7 +106,7 @@ export default function TreeNode({
               }}
               title="Delete"
             >
-              x
+              <i className="fa fa-trash-o" />
             </button>
           )}
         </div>

@@ -64,8 +64,10 @@ export default function App() {
 
       {m.error && (
         <div className="error-banner">
+          <i className="fa fa-exclamation-triangle" />
           {m.error}
-          <button className="small" onClick={m.clearError}>
+          <button onClick={m.clearError}>
+            <i className="fa fa-times" style={{ fontSize: 10 }} />
             Dismiss
           </button>
         </div>
@@ -73,7 +75,8 @@ export default function App() {
 
       {!m.manifest ? (
         <div className="empty-state">
-          Select a board to start editing
+          <i className="fa fa-microchip" />
+          <span className="empty-state-text">Select a board to start editing</span>
         </div>
       ) : mode === "json" ? (
         <RawJsonEditor
@@ -96,43 +99,64 @@ export default function App() {
 
           <div className="editor-main">
             <div className="panel panel-left">
-              {screenRoot ? (
-                <ComponentTree
-                  root={screenRoot}
-                  selectedPath={m.selectedPath}
-                  schema={schema}
-                  onSelect={m.selectNode}
-                  onMove={m.moveNode}
-                  onRemove={m.removeNode}
-                  onAddChild={m.addChild}
-                />
-              ) : (
-                <div className="empty-state">No screen selected</div>
-              )}
-            </div>
-            <div className="panel panel-right">
-              {screenRoot && (
-                <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
-                  <DevicePreview
+              <div className="panel-header">
+                <span className="panel-header-label">
+                  <i className="fa fa-sitemap" />
+                  Component Tree
+                </span>
+              </div>
+              <div className="panel-content">
+                {screenRoot ? (
+                  <ComponentTree
                     root={screenRoot}
                     selectedPath={m.selectedPath}
+                    schema={schema}
                     onSelect={m.selectNode}
-                    boardName={m.selectedBoard}
+                    onMove={m.moveNode}
+                    onRemove={m.removeNode}
+                    onAddChild={m.addChild}
                   />
-                </div>
-              )}
-              {selectedNode && schema ? (
-                <PropEditor
-                  node={selectedNode}
-                  schema={schema}
-                  onUpdateProps={m.updateNodeProps}
-                  onUpdateField={m.updateNodeField}
+                ) : (
+                  <div className="empty-state">
+                    <span className="empty-state-text">No screen selected</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="panel-center">
+              {screenRoot && (
+                <DevicePreview
+                  root={screenRoot}
+                  selectedPath={m.selectedPath}
+                  onSelect={m.selectNode}
+                  boardName={m.selectedBoard}
                 />
-              ) : (
-                <div className="empty-state">
-                  Select a component to edit its properties
-                </div>
               )}
+            </div>
+
+            <div className="panel panel-right">
+              <div className="panel-header">
+                <span className="panel-header-label">
+                  <i className="fa fa-sliders" />
+                  Properties
+                </span>
+              </div>
+              <div className="panel-content">
+                {selectedNode && schema ? (
+                  <PropEditor
+                    node={selectedNode}
+                    schema={schema}
+                    onUpdateProps={m.updateNodeProps}
+                    onUpdateField={m.updateNodeField}
+                  />
+                ) : (
+                  <div className="empty-state">
+                    <i className="fa fa-mouse-pointer" />
+                    <span className="empty-state-text">Select a component to edit</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </>
